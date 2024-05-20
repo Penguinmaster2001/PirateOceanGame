@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://de16bgc4gxdij"]
+
+[ext_resource type="ArrayMesh" uid="uid://2qqdrs0ng837" path="res://hexagon.obj" id="1_7uugj"]
+[ext_resource type="Script" path="res://hex_tile.gd" id="1_r3xhw"]
+[ext_resource type="Texture2D" uid="uid://c8336342hcjus" path="res://icon.svg" id="3_wq5ah"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_um5q3"]
+albedo_color = Color(0.160784, 0.443137, 0.596078, 1)
+albedo_texture = ExtResource("3_wq5ah")
+
+[node name="HexTile" type="Node3D"]
+script = ExtResource("1_r3xhw")
+
+[node name="Hexagon" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_7uugj")
+surface_material_override/0 = SubResource("StandardMaterial3D_um5q3")

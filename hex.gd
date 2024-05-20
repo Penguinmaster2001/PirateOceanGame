@@ -1,0 +1,76 @@
+
+extends Node
+
+class_name Hex
+
+# This contains simple operations on the hexagon grid
+
+# Right now this only really does stuff with Vector3i
+# But it should be able to take in hex_tiles for some operations eventually
+
+# static var directions = [
+# 	Hex( 1,  0),
+# 	Hex( 1, -1),
+# 	Hex( 0, -1),
+# 	Hex(-1,  0),
+# 	Hex(-1,  1),
+# 	Hex( 0,  1)
+# ]
+
+
+
+# Cube coords
+var q
+var r
+var s
+
+# This class will eventually need to include other stuff such as
+# Terrain type
+# model
+# other stuff idk
+
+
+
+func _init(init_q: int, init_r: int):
+	self.q = init_q
+	self.r = init_r
+	self.s = -init_q - init_r
+
+
+
+func get_cube_coords() -> Vector3i:
+	return Vector3i(q, r, s)
+
+func get_axial_coords() -> Vector2i:
+	return Vector2i(q, r)
+
+func get_world_coords(size: float) -> Vector3:
+	# Pointy
+	var x = size * ((sqrt(3.0) * self.q)  +  ((sqrt(3.0) / 2.0) * self.r))
+	var y = size * 1.5 * self.r
+	return Vector3(x, 0, y)
+
+
+func get_mag() -> int:
+	return int((abs(self.q) + abs(self.r) + abs(self.s)) / 2)
+
+func get_distance(other: Hex) -> int:
+	return self.sub(other).get_mag()
+
+
+
+func add(other: Hex) -> Hex:
+	return Hex.new(self.q + other.q, self.r + other.r)
+
+func sub(other: Hex) -> Hex:
+	return Hex.new(self.q - other.q, self.r - other.r)
+
+func scale(f: int) -> Hex:
+	return Hex.new(self.q * f, self.r * f)
+
+
+# func neighbor(direction: int):
+# 	return self.add(directions[direction % 6])
+
+func eq(other: Hex) -> bool:
+	return self.q == other.q && self.r == other.r
