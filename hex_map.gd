@@ -1,6 +1,6 @@
 
 extends Node
-class_name HexMap
+# class_name HexMap
 
 var num_hexes = 0
 var hex_storage = { }
@@ -8,8 +8,8 @@ var hex_list = [ ]
 
 
 
-func _init(size: int):
-	_generate_triangle(size)
+# func _init(size: int):
+# 	_generate_triangle(size)
 
 
 func _add_hex(q, r):
@@ -32,10 +32,12 @@ func _generate_parallelogram(l: int, w: int):
 
 
 
-func _generate_triangle(size: int):
+func generate_triangle(size: int):
 	for q in range(size):
 		for r in range(size - q):
 			_add_hex(q, r)
+	
+	print(hex_list)
 
 
 
@@ -46,6 +48,11 @@ func _generate_hexagon(radius: int):
 
 		for r in range(r1, r2 + 1):
 			_add_hex(q, r)
+
+
+
+func get_hex(q, r):
+	return hex_storage.get([q, r], null)
 
 
 

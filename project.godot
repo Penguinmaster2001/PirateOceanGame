@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Hex="res://hex.gd"
+HexMap="*res://hex_map.gd"
 
 [dotnet]
 

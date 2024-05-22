@@ -8,14 +8,14 @@ class_name Hex
 # Right now this only really does stuff with Vector3i
 # But it should be able to take in hex_tiles for some operations eventually
 
-# static var directions = [
-# 	Hex( 1,  0),
-# 	Hex( 1, -1),
-# 	Hex( 0, -1),
-# 	Hex(-1,  0),
-# 	Hex(-1,  1),
-# 	Hex( 0,  1)
-# ]
+static var directions = [
+	Hex.new( 1,  0), # Right
+	Hex.new( 1, -1), # Up Right
+	Hex.new( 0, -1), # Up Left
+	Hex.new(-1,  0), # Left
+	Hex.new(-1,  1), # Down Left
+	Hex.new( 0,  1)  # Down Right
+]
 
 
 
@@ -69,8 +69,13 @@ func scale(f: int) -> Hex:
 	return Hex.new(self.q * f, self.r * f)
 
 
-# func neighbor(direction: int):
-# 	return self.add(directions[direction % 6])
+func get_neighbor_coord(direction: int):
+	return self.add(directions[direction % 6])
 
 func eq(other: Hex) -> bool:
 	return self.q == other.q && self.r == other.r
+
+
+
+func _to_string() -> String:
+	return "Hex(q: %d, r: %d, s: %d)" % [self.q, self.r, self.s]
