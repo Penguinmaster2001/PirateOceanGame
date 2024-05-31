@@ -8,7 +8,7 @@ class_name Hex
 # Right now this only really does stuff with Vector3i
 # But it should be able to take in hex_tiles for some operations eventually
 
-static var directions = [
+static var directions := [
 	Hex.new( 1,  0), # Right
 	Hex.new( 1, -1), # Up Right
 	Hex.new( 0, -1), # Up Left
@@ -20,18 +20,31 @@ static var directions = [
 
 
 # Cube coords
-var q
-var r
-var s
+var q: int
+var r: int
+var s: int
 
 # This class will eventually need to include other stuff such as
 # Terrain type
 # model
 # other stuff idk
 
+# The terrain type determines the wave function collapse stuff
+
+enum {
+	UNDEF,
+	WATER,
+	SHORE,
+	FOREST,
+	MOUNT,
+	PORT
+}
+
+var terrain_type : int = UNDEF
 
 
-func _init(init_q: int, init_r: int):
+
+func _init(init_q: int, init_r: int) -> void:
 	self.q = init_q
 	self.r = init_r
 	self.s = -init_q - init_r
@@ -46,8 +59,8 @@ func get_axial_coords() -> Vector2i:
 
 func get_world_coords(size: float) -> Vector3:
 	# Pointy
-	var x = size * ((sqrt(3.0) * self.q)  +  ((sqrt(3.0) / 2.0) * self.r))
-	var y = size * 1.5 * self.r
+	var x := size * ((sqrt(3.0) * self.q)  +  ((sqrt(3.0) / 2.0) * self.r))
+	var y := size * 1.5 * self.r
 	return Vector3(x, 0, y)
 
 
@@ -69,8 +82,15 @@ func scale(f: int) -> Hex:
 	return Hex.new(self.q * f, self.r * f)
 
 
-func get_neighbor_coord(direction: int):
+func get_neighbor_coord(direction: int) -> Hex:
 	return self.add(directions[direction % 6])
+
+
+
+func get_terrain_type() -> int:
+	return terrain_type
+
+
 
 func eq(other: Hex) -> bool:
 	return self.q == other.q && self.r == other.r

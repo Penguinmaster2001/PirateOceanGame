@@ -1,0 +1,77 @@
+[gd_resource type="VisualShader" load_steps=9 format=3 uid="uid://bqxglw6cmg366"]
+
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_mtqh4"]
+
+[sub_resource type="VisualShaderNodeFloatConstant" id="VisualShaderNodeFloatConstant_v6hk2"]
+constant = 2.0
+
+[sub_resource type="VisualShaderNodeColorConstant" id="VisualShaderNodeColorConstant_w2y7a"]
+constant = Color(0.342016, 0.662913, 0.665599, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_58m8f"]
+noise_type = 2
+frequency = 0.0178
+fractal_type = 0
+fractal_octaves = 1
+cellular_distance_function = 1
+cellular_return_type = 3
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_uyy6b"]
+width = 256
+height = 256
+depth = 256
+seamless = true
+noise = SubResource("FastNoiseLite_58m8f")
+
+[sub_resource type="VisualShaderNodeTexture3D" id="VisualShaderNodeTexture3D_rt15m"]
+output_port_for_preview = 0
+texture = SubResource("NoiseTexture3D_uyy6b")
+
+[sub_resource type="VisualShaderNodeCompare" id="VisualShaderNodeCompare_mhjw1"]
+function = 2
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_17pre"]
+input_name = "fragcoord"
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
+
+
+
+void fragment() {
+// ColorConstant:4
+	vec4 n_out4p0 = vec4(0.342016, 0.662913, 0.665599, 1.000000);
+
+
+// FloatConstant:2
+	float n_out2p0 = 0.000000;
+
+
+// FloatConstant:3
+	float n_out3p0 = 2.000000;
+
+
+// Output:0
+	ALBEDO = vec3(n_out4p0.xyz);
+	ROUGHNESS = n_out2p0;
+	SPECULAR = n_out3p0;
+
+
+}
+"
+graph_offset = Vector2(-946.934, -15.8678)
+nodes/fragment/2/node = SubResource("VisualShaderNodeFloatConstant_mtqh4")
+nodes/fragment/2/position = Vector2(44.0909, 181.727)
+nodes/fragment/3/node = SubResource("VisualShaderNodeFloatConstant_v6hk2")
+nodes/fragment/3/position = Vector2(40, 260)
+nodes/fragment/4/node = SubResource("VisualShaderNodeColorConstant_w2y7a")
+nodes/fragment/4/position = Vector2(60, 100)
+nodes/fragment/5/node = SubResource("VisualShaderNodeTexture3D_rt15m")
+nodes/fragment/5/position = Vector2(-480, 220)
+nodes/fragment/6/node = SubResource("VisualShaderNodeCompare_mhjw1")
+nodes/fragment/6/position = Vector2(-140, 160)
+nodes/fragment/7/node = SubResource("VisualShaderNodeInput_17pre")
+nodes/fragment/7/position = Vector2(-880, 240)
+nodes/fragment/connections = PackedInt32Array(2, 0, 0, 3, 3, 0, 0, 4, 7, 0, 5, 0, 4, 0, 0, 0)

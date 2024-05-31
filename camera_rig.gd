@@ -1,26 +1,26 @@
 
 extends Node3D
 
-var right_click_pressed = false
+var right_click_pressed := false
 
-var maxPitchDeg : float = 30
-var minPitchDeg : float = -45
-var maxZoom : float = 200
-var minZoom : float = 6
-var zoomStep : float = 2
-var verticalSensitivity : float = 0.002
-var horizontalSensitivity : float = 0.002
+var maxPitchDeg := 30.0
+var minPitchDeg := -45.0
+var maxZoom := 1000.0
+var minZoom := 6.0
+var zoomStep := 2.0
+var verticalSensitivity := 0.002
+var horizontalSensitivity := 0.002
 
 var _curZoom : float = maxZoom
 
 
 
-func _process(_delta):
+func _process(_delta: float) -> void:
     get_child(0).position = Vector3(0.0, _curZoom, _curZoom)
 
 
 
-func _unhandled_input(event):
+func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseButton:
         if event.button_index == MOUSE_BUTTON_RIGHT:
             right_click_pressed = event.pressed

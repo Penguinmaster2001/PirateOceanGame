@@ -2,11 +2,11 @@ extends Node3D
 
 @export_range (0.0, 50.0) var travel_speed := 25.0
 
-var cur_hex
-var target_pos = Vector3.ZERO
+var cur_hex: Hex
+var target_pos := Vector3.ZERO
 
 
-var keys_to_dirs = {
+var keys_to_dirs := {
 	KEY_W: 0, # Right
 	KEY_Q: 1, # Up Right
 	KEY_A: 2, # Up Left
@@ -17,23 +17,23 @@ var keys_to_dirs = {
 
 
 
-func _ready():
+func _ready() -> void:
 	cur_hex = HexMap.get_hexes()[0]
 
 
 
-func _process(delta):
-	var dist_to_target = position.distance_to(target_pos)
-	var dir_to_target = position.direction_to(target_pos)
+func _process(delta: float) -> void:
+	var dist_to_target := position.distance_to(target_pos)
+	var dir_to_target := position.direction_to(target_pos)
 
 	position += (travel_speed * clampf(dist_to_target / 25.0, 0.25, 3.0) * delta) * dir_to_target
 
 
 
-func _change_tile(direction: int):
-	var dir = cur_hex.get_neighbor_coord(direction)
+func _change_tile(direction: int) -> void:
+	var dir := cur_hex.get_neighbor_coord(direction)
 
-	var new_hex = HexMap.get_hex(dir.q, dir.r)
+	var new_hex := HexMap.get_hex(dir.q, dir.r)
 
 	print(cur_hex)
 	print(dir)
@@ -45,7 +45,7 @@ func _change_tile(direction: int):
 
 
 
-func _input(event):
+func _input(event: InputEvent) -> void:
 	if not event is InputEventKey:
 		return
 	
