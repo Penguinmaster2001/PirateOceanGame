@@ -5,7 +5,7 @@ var right_click_pressed := false
 
 var maxPitchDeg := 30.0
 var minPitchDeg := -45.0
-var maxZoom := 1000.0
+var maxZoom := 3000.0
 var minZoom := 6.0
 var zoomStep := 2.0
 var verticalSensitivity := 0.002

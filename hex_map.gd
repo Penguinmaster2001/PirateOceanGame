@@ -6,12 +6,13 @@ extends Node
 var size := 0
 var hexes := { }
 var not_collapsed := [ ]
+var collapsed := [ ]
 var collapse_shortlist := [ ]
 
 
 
 # The lists of things each terrain type can border
-var wfc_rules := {
+@export var wfc_rules := {
 	# Hex.UNDEF:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.FOREST, Hex.MOUNT, Hex.PORT],
 	# Hex.WATER:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.PORT],
 	# Hex.SHORE:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.PORT, Hex.FOREST],
@@ -19,12 +20,13 @@ var wfc_rules := {
 	# Hex.MOUNT:	[Hex.UNDEF, Hex.FOREST, Hex.MOUNT],
 	# Hex.PORT:	[Hex.UNDEF, Hex.WATER, Hex.SHORE]
 
-	#			 U, W, S, F, M, P
+	# Hex.DWATER:	[6, 6, 0, 0, 0, 1],
+			  #  U, W, S, F, M, P
 	Hex.UNDEF:	[6, 6, 6, 6, 6, 6],
-	Hex.WATER:	[6, 6, 4, 0, 0, 1],
-	Hex.SHORE:	[6, 4, 3, 3, 0, 1],
-	Hex.FOREST:	[6, 0, 6, 6, 6, 0],
-	Hex.MOUNT:	[6, 0, 0, 6, 5, 0],
+	Hex.WATER:	[6, 6, 3, 0, 0, 1],
+	Hex.SHORE:	[6, 5, 4, 3, 0, 1],
+	Hex.FOREST:	[6, 0, 6, 6, 4, 0],
+	Hex.MOUNT:	[6, 0, 0, 4, 4, 0],
 	Hex.PORT:	[6, 5, 1, 0, 0, 0]
 	# Hex.UNDEF:	[[0, 6], [0, 6], [0, 6], [0, 6], [0, 6], [0, 6]],
 	# Hex.WATER:	[[0, 6], [0, 6], [0, 2], [0, 0], [0, 0], [0, 0]],
@@ -60,6 +62,17 @@ func generate_triangle(side_length: int) -> void:
 	for q in range(side_length):
 		for r in range(side_length - q):
 			_add_hex(q, r)
+
+	not_collapsed = get_hexes()
+	# collapse_coords(0,  0,  Hex.MOUNT)
+	# collapse_coords(0,  1,  Hex.FOREST)
+	# collapse_coords(1,  0,  Hex.FOREST)
+	# collapse_coords(1,  1,  Hex.PORT)
+	# collapse_coords(2,  1,  Hex.WATER)
+	# collapse_coords(1,  2,  Hex.WATER)
+
+	# for i in range(4, size / 4):
+	# 	collapse_coords(i, i, Hex.WATER)
 
 
 
@@ -106,32 +119,16 @@ func get_hex_neighbors(hex: Hex) -> Array:
 
 
 
-func generate_terrain_types() -> void:
-	not_collapsed = get_hexes()
-
-
-	# collapse_coords(0,  0,  Hex.MOUNT)
-	# collapse_coords(0,  1,  Hex.FOREST)
-	# collapse_coords(1,  0,  Hex.FOREST)
-	# collapse_coords(1,  1,  Hex.PORT)
-	# collapse_coords(2,  1,  Hex.WATER)
-	# collapse_coords(1,  2,  Hex.WATER)
-	# collapse_coords(8,  20, Hex.MOUNT)
-	# collapse_coords(25, 5,  Hex.MOUNT)
-
-	# for q in range(4, size / 4):
-	# 	for r in range(4, size / 4):
-	# 		collapse_coords(q, r, Hex.WATER)
-
+func generate_terrain_types() -> Hex:
 	var next_to_collapse := _get_most_constrained()
 
-	while next_to_collapse != null:
+	if next_to_collapse != null:
 		collapse_hex(next_to_collapse, _pick_random_weighted(next_to_collapse.valids))
 
-		if not_collapsed.size() % 50 == 0:
-			print("%f done, num left: %d, shortlist length: %d" %  [1.0 - (float(not_collapsed.size()) / float(hexes.size())), not_collapsed.size(), collapse_shortlist.size()])
+		# next_to_collapse = _get_most_constrained()
 
-		next_to_collapse = _get_most_constrained()
+	print("%f done, num left: %d, shortlist length: %d" % [1.0 - (float(not_collapsed.size()) / float(hexes.size())), not_collapsed.size(), collapse_shortlist.size()])
+	return next_to_collapse
 
 
 
@@ -150,6 +147,7 @@ func collapse_hex(hex: WfcHex, type: int) -> void:
 	
 	not_collapsed.erase(hex)
 	collapse_shortlist.erase(hex)
+	collapsed.append(hex)
 
 	hex.collapse(type)
 
@@ -182,12 +180,12 @@ func _pick_random_weighted(valids: Array) -> int:
 		return Hex.UNDEF;
 
 	var weights_map := {
-		Hex.UNDEF:	0,
-		Hex.WATER:	20,
-		Hex.SHORE:	4,
-		Hex.FOREST:	10,
-		Hex.MOUNT:	8,
-		Hex.PORT:	1
+		Hex.UNDEF:	0.0,
+		Hex.WATER:	32.06,
+		Hex.SHORE:	5.0,
+		Hex.FOREST:	20.0,
+		Hex.MOUNT:	6.0,
+		Hex.PORT:	1.0
 	}
 
 	var cum_weight := 0

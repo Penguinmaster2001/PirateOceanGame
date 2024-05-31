@@ -22,18 +22,33 @@ var hex_textures := {
 func _ready() -> void:
 	HexMap.generate_triangle(grid_size);
 
-	HexMap.generate_terrain_types();
+	# HexMap.generate_terrain_types()
 
-	_display_map(HexMap.get_hexes())
+	_display_map(HexMap.collapsed)
+
+
+func _process(_delta: float) -> void:
+	for i in range(2):
+		_display_hex(HexMap.generate_terrain_types())
+	# _display_map(HexMap.get_hexes())
 
 
 
 func _display_map(hexes: Array) -> void:
 	for hex: Hex in hexes:
-		var tile_coords := hex.get_world_coords(TILE_SIZE)
+		_display_hex(hex)
+	
 
-		var tile := HEX_TILE.instantiate()
-		add_child(tile)
-		tile.translate(tile_coords)
-		
-		tile.get_child(0).material_override = hex_textures[hex.get_terrain_type()]
+
+func _display_hex(hex: Hex) -> void:
+	if hex == null:
+		return
+
+	var tile_coords := hex.get_world_coords(TILE_SIZE)
+
+	var tile := HEX_TILE.instantiate()
+	add_child(tile)
+	tile.translate(tile_coords)
+	
+	tile.get_child(0).material_override = hex_textures[hex.get_terrain_type()]
+

@@ -33,6 +33,7 @@ var s: int
 
 enum {
 	UNDEF,
+	# DWATER,
 	WATER,
 	SHORE,
 	FOREST,

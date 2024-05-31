@@ -1,6 +1,7 @@
 extends Node3D
 
-@export_range (0.0, 50.0) var travel_speed := 25.0
+# @export_range (0.0, 300.0) var travel_speed := 25.0
+var travel_speed := 300.0
 
 var cur_hex: Hex
 var target_pos := Vector3.ZERO
@@ -26,7 +27,8 @@ func _process(delta: float) -> void:
 	var dist_to_target := position.distance_to(target_pos)
 	var dir_to_target := position.direction_to(target_pos)
 
-	position += (travel_speed * clampf(dist_to_target / 25.0, 0.25, 3.0) * delta) * dir_to_target
+	if dist_to_target > 1.0:
+		position += (travel_speed * clampf(dist_to_target / 25.0, 0.25, 3.0) * delta) * dir_to_target
 
 
 
