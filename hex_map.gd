@@ -7,7 +7,7 @@ var size := 0
 var hexes := { }
 var not_collapsed := [ ]
 var collapsed := [ ]
-var collapse_shortlist := [ ]
+var shortlist : HexShortlist = HexShortlist.new()
 
 
 
@@ -23,10 +23,10 @@ var collapse_shortlist := [ ]
 	# Hex.DWATER:	[6, 6, 0, 0, 0, 1],
 			  #  U, W, S, F, M, P
 	Hex.UNDEF:	[6, 6, 6, 6, 6, 6],
-	Hex.WATER:	[6, 6, 3, 0, 0, 1],
-	Hex.SHORE:	[6, 5, 4, 3, 0, 1],
-	Hex.FOREST:	[6, 0, 6, 6, 4, 0],
-	Hex.MOUNT:	[6, 0, 0, 4, 4, 0],
+	Hex.WATER:	[6, 6, 4, 0, 0, 1],
+	Hex.SHORE:	[6, 4, 3, 3, 0, 1],
+	Hex.FOREST:	[6, 0, 6, 6, 6, 0],
+	Hex.MOUNT:	[6, 0, 0, 6, 5, 0],
 	Hex.PORT:	[6, 5, 1, 0, 0, 0]
 	# Hex.UNDEF:	[[0, 6], [0, 6], [0, 6], [0, 6], [0, 6], [0, 6]],
 	# Hex.WATER:	[[0, 6], [0, 6], [0, 2], [0, 0], [0, 0], [0, 0]],
@@ -64,15 +64,15 @@ func generate_triangle(side_length: int) -> void:
 			_add_hex(q, r)
 
 	not_collapsed = get_hexes()
-	# collapse_coords(0,  0,  Hex.MOUNT)
-	# collapse_coords(0,  1,  Hex.FOREST)
-	# collapse_coords(1,  0,  Hex.FOREST)
-	# collapse_coords(1,  1,  Hex.PORT)
-	# collapse_coords(2,  1,  Hex.WATER)
-	# collapse_coords(1,  2,  Hex.WATER)
+	collapse_coords(0,  0,  Hex.MOUNT)
+	collapse_coords(0,  1,  Hex.FOREST)
+	collapse_coords(1,  0,  Hex.FOREST)
+	collapse_coords(1,  1,  Hex.PORT)
+	collapse_coords(2,  1,  Hex.WATER)
+	collapse_coords(1,  2,  Hex.WATER)
 
-	# for i in range(4, size / 4):
-	# 	collapse_coords(i, i, Hex.WATER)
+	for i in range(4, size / 4):
+		collapse_coords(i, i, Hex.WATER)
 
 
 
@@ -126,16 +126,22 @@ func generate_terrain_types() -> Hex:
 		collapse_hex(next_to_collapse, _pick_random_weighted(next_to_collapse.valids))
 
 		# next_to_collapse = _get_most_constrained()
+		return next_to_collapse
+	
+	return null
 
-	print("%f done, num left: %d, shortlist length: %d" % [1.0 - (float(not_collapsed.size()) / float(hexes.size())), not_collapsed.size(), collapse_shortlist.size()])
-	return next_to_collapse
+
+
+func display_data() -> void:
+	print("%f done, num left: %d, shortlist length: %d" % \
+		[1.0 - (float(not_collapsed.size()) / float(hexes.size())), not_collapsed.size(), shortlist.count()])
 
 
 
 func collapse_coords(q: int, r: int, type: int) -> void:
 	var hex := get_hex(q, r)
 
-	if hex == null or not hex is WfcHex:
+	if hex == null:
 		return
 
 	collapse_hex(hex, type)
@@ -146,7 +152,7 @@ func collapse_hex(hex: WfcHex, type: int) -> void:
 		return
 	
 	not_collapsed.erase(hex)
-	collapse_shortlist.erase(hex)
+	shortlist.remove(hex)
 	collapsed.append(hex)
 
 	hex.collapse(type)
@@ -162,9 +168,14 @@ func collapse_hex(hex: WfcHex, type: int) -> void:
 			neighbor.valids[type] -= 1
 
 			hex.valids[neighbor.get_terrain_type()] -= 1
-		
-		elif not collapse_shortlist.has(neighbor):
-			collapse_shortlist.append(neighbor)
+
+			continue
+
+		var previous_num := neighbor.get_num_options()
+
+		neighbor.set_valids(_valid_types(neighbor))
+
+		shortlist.update_or_insert(neighbor, previous_num)
 
 
 
@@ -180,12 +191,12 @@ func _pick_random_weighted(valids: Array) -> int:
 		return Hex.UNDEF;
 
 	var weights_map := {
-		Hex.UNDEF:	0.0,
-		Hex.WATER:	32.06,
-		Hex.SHORE:	5.0,
-		Hex.FOREST:	20.0,
-		Hex.MOUNT:	6.0,
-		Hex.PORT:	1.0
+		Hex.UNDEF:	0,
+		Hex.WATER:	20,
+		Hex.SHORE:	4,
+		Hex.FOREST:	10,
+		Hex.MOUNT:	8,
+		Hex.PORT:	1
 	}
 
 	var cum_weight := 0
@@ -210,29 +221,15 @@ func _pick_random_weighted(valids: Array) -> int:
 
 
 
+# Return the most constrained tile, or a random uncollapsed one if the shortlist is empty
 func _get_most_constrained() -> WfcHex:
-	var lowest_constraint := 10
-	var lowest_constrained := [ ]
-
 	if not_collapsed.is_empty():
 		return null
 
-	if collapse_shortlist.is_empty():
+	if shortlist.is_empty():
 		return not_collapsed.pick_random()
-
-	for hex: WfcHex in collapse_shortlist:
-		hex.set_valids(_valid_types(hex))
-
-		if hex.get_valid_total() < lowest_constraint:
-			lowest_constrained.clear()
-			lowest_constraint = hex.get_valid_total()
-
-			lowest_constrained.append(hex)
-
-		elif hex.get_valid_total() == lowest_constraint:
-			lowest_constrained.append(hex)
-
-	return lowest_constrained.pick_random()
+	
+	return shortlist.get_most_constrained_random()
 
 
 

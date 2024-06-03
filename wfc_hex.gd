@@ -7,6 +7,7 @@ var collapsed := false
 # var valids := [Hex.WATER, Hex.SHORE, Hex.FOREST, Hex.MOUNT, Hex.PORT]
 # var valids := [[0, 6], [0, 6], [0, 6], [0, 6], [0, 6], [0, 6]]
 var valids := [6, 6, 6, 6, 6, 6]
+var num_options := 6
 
 
 
@@ -15,13 +16,8 @@ func _init(init_q: int, init_r: int) -> void:
 
 
 
-func get_valid_total() -> int:
-	var total := 0;
-
-	for v: int in valids:
-		total += v
-
-	return total
+func get_num_options() -> int:
+	return num_options
 
 
 

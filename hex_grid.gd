@@ -28,9 +28,10 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	for i in range(2):
+	for i in range(20):
 		_display_hex(HexMap.generate_terrain_types())
-	# _display_map(HexMap.get_hexes())
+
+	HexMap.display_data()
 
 
 
