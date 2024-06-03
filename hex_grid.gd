@@ -8,30 +8,29 @@ const HEX_TILE := preload("res://hex_tile.tscn")
 @export_range (1, 500) var grid_size := 10
 
 
-var hex_textures := {
-	Hex.UNDEF:	preload("res://TileTextures/undefined.tres"),
-	Hex.WATER:	preload("res://TileTextures/water.tres"),
-	Hex.SHORE:	preload("res://TileTextures/shore.tres"),
-	Hex.FOREST:	preload("res://TileTextures/forest.tres"),
-	Hex.MOUNT:	preload("res://TileTextures/mountain.tres"),
-	Hex.PORT:	preload("res://TileTextures/port.tres")
-}
+var hex_textures := [ ]
 
 
 
 func _ready() -> void:
+	var texture_paths := HexMap.get_hex_types("res://hex_type_data.json")
+
+	for path: String in texture_paths:
+		hex_textures.append(load(path))
+
 	HexMap.generate_triangle(grid_size);
 
 	# HexMap.generate_terrain_types()
 
-	_display_map(HexMap.collapsed)
+	# _display_map(HexMap.collapsed)
 
 
 func _process(_delta: float) -> void:
-	for i in range(20):
-		_display_hex(HexMap.generate_terrain_types())
+	# for i in range(20):
+	# 	_display_hex(HexMap.generate_terrain_types())
 
-	HexMap.display_data()
+	# HexMap.display_data()
+	pass
 
 
 

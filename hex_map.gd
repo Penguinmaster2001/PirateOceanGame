@@ -11,31 +11,8 @@ var shortlist : HexShortlist = HexShortlist.new()
 
 
 
-# The lists of things each terrain type can border
-@export var wfc_rules := {
-	# Hex.UNDEF:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.FOREST, Hex.MOUNT, Hex.PORT],
-	# Hex.WATER:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.PORT],
-	# Hex.SHORE:	[Hex.UNDEF, Hex.WATER, Hex.SHORE, Hex.PORT, Hex.FOREST],
-	# Hex.FOREST:	[Hex.UNDEF, Hex.SHORE, Hex.FOREST, Hex.MOUNT],
-	# Hex.MOUNT:	[Hex.UNDEF, Hex.FOREST, Hex.MOUNT],
-	# Hex.PORT:	[Hex.UNDEF, Hex.WATER, Hex.SHORE]
-
-	# Hex.DWATER:	[6, 6, 0, 0, 0, 1],
-			  #  U, W, S, F, M, P
-	Hex.UNDEF:	[6, 6, 6, 6, 6, 6],
-	Hex.WATER:	[6, 6, 4, 0, 0, 1],
-	Hex.SHORE:	[6, 4, 3, 3, 0, 1],
-	Hex.FOREST:	[6, 0, 6, 6, 6, 0],
-	Hex.MOUNT:	[6, 0, 0, 6, 5, 0],
-	Hex.PORT:	[6, 5, 1, 0, 0, 0]
-	# Hex.UNDEF:	[[0, 6], [0, 6], [0, 6], [0, 6], [0, 6], [0, 6]],
-	# Hex.WATER:	[[0, 6], [0, 6], [0, 2], [0, 0], [0, 0], [0, 0]],
-	# Hex.SHORE:	[[0, 6], [1, 5], [1, 5], [0, 3], [0, 0], [0, 1]],
-	# Hex.FOREST:	[[0, 6], [0, 0], [0, 6], [0, 6], [0, 4], [0, 0]],
-	# Hex.MOUNT:	[[0, 6], [0, 0], [0, 0], [0, 4], [0, 6], [0, 0]],
-	# Hex.PORT:	[[0, 6], [4, 5], [1, 2], [0, 0], [0, 0], [0, 0]]
-}
-const NUM_TYPES = 6
+# List of the allowed bordering edges for each hex
+var wfc_rules := [ ]
 
 
 
@@ -47,14 +24,6 @@ func _add_hex(q: int, r: int) -> void:
 
 
 
-# Create a map in a parallelogram shape
-func _generate_parallelogram(l: int, w: int) -> void:
-	for q in range(l):
-		for r in range(w):
-			_add_hex(q, r)
-
-
-
 # Generate a map in a triangle shape
 # (0, 0) is the bottom point, (side_length, 0), (0, side_length) are the other corners
 func generate_triangle(side_length: int) -> void:
@@ -63,27 +32,16 @@ func generate_triangle(side_length: int) -> void:
 		for r in range(side_length - q):
 			_add_hex(q, r)
 
-	not_collapsed = get_hexes()
-	collapse_coords(0,  0,  Hex.MOUNT)
-	collapse_coords(0,  1,  Hex.FOREST)
-	collapse_coords(1,  0,  Hex.FOREST)
-	collapse_coords(1,  1,  Hex.PORT)
-	collapse_coords(2,  1,  Hex.WATER)
-	collapse_coords(1,  2,  Hex.WATER)
+	# not_collapsed = get_hexes()
+	# collapse_coords(0,  0,  Hex.MOUNT)
+	# collapse_coords(0,  1,  Hex.FOREST)
+	# collapse_coords(1,  0,  Hex.FOREST)
+	# collapse_coords(1,  1,  Hex.PORT)
+	# collapse_coords(2,  1,  Hex.WATER)
+	# collapse_coords(1,  2,  Hex.WATER)
 
-	for i in range(4, size / 4):
-		collapse_coords(i, i, Hex.WATER)
-
-
-
-# Generate a hexagon shaped map
-func _generate_hexagon(radius: int) -> void:
-	for q in range(-radius, radius + 1):
-		var r1 : int = max(-radius, -q - radius)
-		var r2 : int = min( radius, -q + radius)
-
-		for r in range(r1, r2 + 1):
-			_add_hex(q, r)
+	# for i in range(4, size / 4):
+	# 	collapse_coords(i, i, Hex.WATER)
 
 
 
@@ -147,6 +105,7 @@ func collapse_coords(q: int, r: int, type: int) -> void:
 	collapse_hex(hex, type)
 
 
+
 func collapse_hex(hex: WfcHex, type: int) -> void:
 	if hex.is_collapsed():
 		return
@@ -182,7 +141,7 @@ func collapse_hex(hex: WfcHex, type: int) -> void:
 func _pick_random_weighted(valids: Array) -> int:
 	var possible := [Hex.WATER, Hex.SHORE, Hex.FOREST, Hex.MOUNT, Hex.PORT]
 
-	for i: int in range(NUM_TYPES):
+	for i: int in range(6):
 		if valids[i] <= 0:
 			possible.erase(i)
 	
@@ -241,8 +200,27 @@ func _valid_types(hex: WfcHex) -> Array:
 		if neighbor == null or not neighbor.is_collapsed():
 			continue
 		
-		for i in range(NUM_TYPES):
+		for i in range(6):
 			if neighbor.valids[i] <= 0:
 				valids[i] = 0
 
 	return valids
+
+
+
+func get_hex_types(path: String) -> Array:
+	var file := FileAccess.open(path, FileAccess.READ)
+	var data := file.get_as_text()
+
+	var json := JSON.new()
+	json.parse(data)
+
+	var json_parse : Dictionary = json.data
+	
+	var hex_type_materials := [ ]
+
+	for tile_type: Dictionary in json_parse.values():
+		wfc_rules.append(tile_type["edges"])
+		hex_type_materials.append(tile_type["material"])
+
+	return hex_type_materials

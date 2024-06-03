@@ -1,0 +1,68 @@
+{
+	"undefined": {
+		"edges": [
+			0,
+			0,
+			0,
+			0,
+			0,
+			0
+		],
+		"material": "res://TileTextures/undefined.tres"
+	},
+	"water": {
+		"edges": [
+			1,
+			1,
+			1,
+			1,
+			1,
+			1
+		],
+		"material": "res://TileTextures/water.tres"
+	},
+	"shore_straight": {
+		"edges": [
+			1,
+			1,
+			1,
+			2,
+			2,
+			2
+		],
+		"material": "res://TileTextures/shore.tres"
+	},
+	"shore_corner_convex": {
+		"edges": [
+			1,
+			1,
+			1,
+			1,
+			2,
+			2
+		],
+		"material": "res://TileTextures/shore.tres"
+	},
+	"shore_corner_concave": {
+		"edges": [
+			1,
+			1,
+			2,
+			2,
+			2,
+			2
+		],
+		"material": "res://TileTextures/shore.tres"
+	},
+	"forest": {
+		"edges": [
+			2,
+			2,
+			2,
+			2,
+			2,
+			2
+		],
+		"material": "res://TileTextures/forest.tres"
+	}
+}
