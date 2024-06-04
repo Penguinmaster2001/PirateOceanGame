@@ -53,9 +53,19 @@ func seed_type(num: int, type: int) -> void:
 
 
 
-# Get the hex in the map at the coordinates. Null if there is no hex there
+# Get the hex in the map at the hex coordinates. Null if there is no hex there
 func get_hex(q: int, r: int) -> Hex:
 	return _hexes.get([q, r], null)
+
+
+
+func get_hex_world_coords(x: float, y: float) -> Hex:
+	var hex_size := 25.0
+
+	var q := ((x * sqrt(3) / 3.0)  -  (y / 3.0)) / hex_size
+	var r := (y * 2.0 / 3.0) / hex_size
+
+	return get_hex(roundi(q), roundi(r))
 
 
 

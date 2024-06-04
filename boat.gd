@@ -45,7 +45,19 @@ func _change_tile(direction: int) -> void:
 
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var camera := get_viewport().get_camera_3d()
+
+		var origin := camera.project_ray_origin(event.position)
+		var direction := camera.project_ray_normal(event.position)
+
+		var intersection := origin - ((origin.y / direction.y) * direction)
+		print(HexMap.get_hex_world_coords(intersection.x, intersection.z))
+
+		return
+
+		
 	if not event is InputEventKey or event.is_echo() or event.is_pressed():
 		return
 	
