@@ -1,5 +1,5 @@
 
-extends Node
+extends Node3D
 
 class_name Hex
 
@@ -20,53 +20,35 @@ static var directions := [
 
 
 # Cube coords
-var q: int
-var r: int
-var s: int
+var _q: int
+var _r: int
+var _s: int
 
 # This class will eventually need to include other stuff such as
 # Terrain type
 # model
 # other stuff idk
 
-# The terrain type determines the wave function collapse stuff
-
-enum {
-	UNDEF,
-	# DWATER,
-	WATER,
-	SHORE,
-	FOREST,
-	MOUNT,
-	PORT
-}
-
-var terrain_type : int = UNDEF
+var terrain_type : int = 0
 
 
 
 func _init(init_q: int, init_r: int) -> void:
-	self.q = init_q
-	self.r = init_r
-	self.s = -init_q - init_r
+	self._q = init_q
+	self._r = init_r
+	self._s = -init_q - init_r
 
 
-
-func get_cube_coords() -> Vector3i:
-	return Vector3i(q, r, s)
-
-func get_axial_coords() -> Vector2i:
-	return Vector2i(q, r)
 
 func get_world_coords(size: float) -> Vector3:
 	# Pointy
-	var x := size * ((sqrt(3.0) * self.q)  +  ((sqrt(3.0) / 2.0) * self.r))
-	var y := size * 1.5 * self.r
+	var x := size * ((sqrt(3.0) * self._q)  +  ((sqrt(3.0) / 2.0) * self._r))
+	var y := size * 1.5 * self._r
 	return Vector3(x, 0, y)
 
 
 func get_mag() -> int:
-	return int((abs(self.q) + abs(self.r) + abs(self.s)) / 2)
+	return int((abs(self._q) + abs(self._r) + abs(self._s)) / 2)
 
 func get_distance(other: Hex) -> int:
 	return self.sub(other).get_mag()
@@ -74,13 +56,13 @@ func get_distance(other: Hex) -> int:
 
 
 func add(other: Hex) -> Hex:
-	return Hex.new(self.q + other.q, self.r + other.r)
+	return Hex.new(self._q + other._q, self._r + other._r)
 
 func sub(other: Hex) -> Hex:
-	return Hex.new(self.q - other.q, self.r - other.r)
+	return Hex.new(self._q - other._q, self._r - other._r)
 
 func scale(f: int) -> Hex:
-	return Hex.new(self.q * f, self.r * f)
+	return Hex.new(self._q * f, self._r * f)
 
 
 func get_neighbor_coord(direction: int) -> Hex:
@@ -94,9 +76,9 @@ func get_terrain_type() -> int:
 
 
 func eq(other: Hex) -> bool:
-	return self.q == other.q && self.r == other.r
+	return self._q == other._q && self._r == other._r
 
 
 
 func _to_string() -> String:
-	return "Hex(q: %d, r: %d, s: %d)" % [self.q, self.r, self.s]
+	return "Hex(_q: %d, _r: %d, _s: %d)" % [self._q, self._r, self._s]

@@ -8,9 +8,106 @@
 			0,
 			0
 		],
+		"weight": 0,
 		"material": "res://TileTextures/undefined.tres"
 	},
-	"water": {
+	"super_deep_water": {
+		"edges": [
+			-2,
+			-2,
+			-2,
+			-2,
+			-2,
+			-2
+		],
+		"weight": 20,
+		"material": "res://TileTextures/super_deep_water.tres"
+	},
+	"super_deep_water_transition_straight": {
+		"edges": [
+			-2,
+			-2,
+			-2,
+			-1,
+			-1,
+			-1
+		],
+		"weight": 20,
+		"material": "res://TileTextures/super_deep_water_transition.tres"
+	},
+	"super_deep_water_transition_convex": {
+		"edges": [
+			-2,
+			-2,
+			-2,
+			-2,
+			-1,
+			-1
+		],
+		"weight": 10,
+		"material": "res://TileTextures/super_deep_water_transition.tres"
+	},
+	"super_deep_water_transition_concave": {
+		"edges": [
+			-2,
+			-2,
+			-1,
+			-1,
+			-1,
+			-1
+		],
+		"weight": 30,
+		"material": "res://TileTextures/super_deep_water_transition.tres"
+	},
+	"deep_water": {
+		"edges": [
+			-1,
+			-1,
+			-1,
+			-1,
+			-1,
+			-1
+		],
+		"weight": 30,
+		"material": "res://TileTextures/deep_water.tres"
+	},
+	"deep_water_transition_straight": {
+		"edges": [
+			-1,
+			-1,
+			-1,
+			1,
+			1,
+			1
+		],
+		"weight": 20,
+		"material": "res://TileTextures/deep_water_transition.tres"
+	},
+	"deep_water_transition_convex": {
+		"edges": [
+			-1,
+			-1,
+			-1,
+			-1,
+			1,
+			1
+		],
+		"weight": 10,
+		"material": "res://TileTextures/deep_water_transition.tres"
+	},
+	"deep_water_transition_concave": {
+		"edges": [
+			-1,
+			-1,
+			1,
+			1,
+			1,
+			1
+		],
+		"weight": 20,
+		"material": "res://TileTextures/deep_water_transition.tres"
+	},
+	"shallow_water": {
 		"edges": [
 			1,
 			1,
@@ -19,7 +116,20 @@
 			1,
 			1
 		],
-		"material": "res://TileTextures/water.tres"
+		"weight": 100,
+		"material": "res://TileTextures/shallow_water.tres"
+	},
+	"port_long": {
+		"edges": [
+			2,
+			1,
+			1,
+			1,
+			1,
+			1
+		],
+		"weight": 1,
+		"material": "res://TileTextures/port.tres"
 	},
 	"shore_straight": {
 		"edges": [
@@ -30,6 +140,7 @@
 			2,
 			2
 		],
+		"weight": 30,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"shore_corner_convex": {
@@ -41,6 +152,7 @@
 			2,
 			2
 		],
+		"weight": 20,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"shore_corner_concave": {
@@ -52,6 +164,7 @@
 			2,
 			2
 		],
+		"weight": 20,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"forest": {
@@ -63,6 +176,67 @@
 			2,
 			2
 		],
+		"weight": 30,
 		"material": "res://TileTextures/forest.tres"
+	},
+	"mountain": {
+		"edges": [
+			3,
+			3,
+			2,
+			3,
+			3,
+			2
+		],
+		"weight": 10,
+		"material": "res://TileTextures/mountain.tres"
+	},
+	"mountain_a": {
+		"edges": [
+			2,
+			2,
+			2,
+			2,
+			3,
+			3
+		],
+		"weight": 5,
+		"material": "res://TileTextures/mountain.tres"
+	},
+	"mountain_b": {
+		"edges": [
+			3,
+			2,
+			2,
+			3,
+			2,
+			2
+		],
+		"weight": 5,
+		"material": "res://TileTextures/mountain.tres"
+	},
+	"mountain_c": {
+		"edges": [
+			3,
+			2,
+			2,
+			2,
+			2,
+			2
+		],
+		"weight": 10,
+		"material": "res://TileTextures/mountain.tres"
+	},
+	"mountain_d": {
+		"edges": [
+			3,
+			2,
+			3,
+			2,
+			3,
+			2
+		],
+		"weight": 5,
+		"material": "res://TileTextures/mountain.tres"
 	}
 }

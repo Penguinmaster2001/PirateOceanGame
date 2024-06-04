@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" uid="uid://2qqdrs0ng837" path="res://hexagon.obj" id="1_7uugj"]
 [ext_resource type="Script" path="res://hex_tile.gd" id="1_r3xhw"]
-[ext_resource type="Material" uid="uid://jbn8olokcxpi" path="res://TileTextures/water.tres" id="3_rntgv"]
+[ext_resource type="Material" uid="uid://cnruwwbp1uqc1" path="res://TileTextures/deep_water_transition.tres" id="3_vfxt2"]
 
 [node name="HexTile" type="Node3D"]
 script = ExtResource("1_r3xhw")
@@ -10,4 +10,4 @@ script = ExtResource("1_r3xhw")
 [node name="Hexagon" type="MeshInstance3D" parent="."]
 transform = Transform3D(25, 0, 0, 0, 1, 0, 0, 0, 25, 0, -0.5, 0)
 mesh = ExtResource("1_7uugj")
-surface_material_override/0 = ExtResource("3_rntgv")
+surface_material_override/0 = ExtResource("3_vfxt2")

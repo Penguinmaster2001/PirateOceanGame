@@ -5,11 +5,11 @@ class_name HexShortlist
 
 
 # A dictionary of arrays
-# Keys are number of current_options
-# Values are an array of nodes with that number of current_options
+# Keys are number of options
+# Values are an array of nodes with that number of options
 var shortlist := { }
 
-# This is a list of all the current_options that actually contain hexes
+# This is a list of all the options that actually contain hexes
 var current_options := [ ]
 
 # The number of hexes in the shortlist
@@ -20,6 +20,10 @@ var num_hexes := 0
 # If the hex is already in the shortlist, move it to it's new number of options
 # Otherwise just add it
 func update_or_insert(hex: WfcHex, previous_num: int) -> void:
+	# The hex is already in the correct spot
+	if hex.get_constraint() == previous_num:
+		return
+
 	# Remove the hex from previous spot
 	if shortlist.get(previous_num, null) != null and shortlist[previous_num].has(hex):
 		shortlist[previous_num].erase(hex)
@@ -29,35 +33,33 @@ func update_or_insert(hex: WfcHex, previous_num: int) -> void:
 			current_options.erase(previous_num)
 	
 	# Insert into new spot
-	insert(hex)
+	_insert(hex)
 
 
 
 # Put the hex into the shortlist
 # Add a new list if needed, update least_options if necessary
-func insert(hex: WfcHex) -> void:
-	var num_options := hex.get_num_options()
+func _insert(hex: WfcHex) -> void:
+	var num_options := hex.get_constraint()
 
 	if shortlist.get(num_options, null) == null:
 		shortlist[num_options] = [ ]
 
-		_add_option(num_options)
 	
 	if not shortlist[num_options].has(hex):
 		shortlist[num_options].append(hex)
 		num_hexes += 1
+
+	_add_option(num_options)
 
 
 
 # Remove a hex from the shortlist
 # Update least_options if necessary
 func remove(hex: WfcHex) -> void:
-	var num_options := hex.get_num_options()
+	var num_options := hex.get_constraint()
 
-	if shortlist.get(num_options, null) == null:
-		return
-	
-	if not shortlist[num_options].has(hex):
+	if shortlist.get(num_options, null) == null or not shortlist[num_options].has(hex):
 		return
 	
 	shortlist[num_options].erase(hex)
@@ -95,3 +97,12 @@ func count() -> int:
 
 func is_empty() -> bool:
 	return num_hexes == 0
+
+
+func _to_string() -> String:
+	var string := "Number of hexes: " + String.num_int64(num_hexes) + "\n"
+
+	for option: int in current_options:
+		string += String.num_int64(option) + ": " + shortlist[option].to_string() + "\n"
+
+	return string

@@ -35,11 +35,9 @@ func _process(delta: float) -> void:
 func _change_tile(direction: int) -> void:
 	var dir := cur_hex.get_neighbor_coord(direction)
 
-	var new_hex := HexMap.get_hex(dir.q, dir.r)
+	var new_hex := HexMap.get_hex(dir._q, dir._r)
 
-	print(cur_hex)
-	print(dir)
-	print(new_hex)
+	print(new_hex as WfcHex)
 
 	if new_hex != null:
 		cur_hex = new_hex
@@ -48,13 +46,7 @@ func _change_tile(direction: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not event is InputEventKey:
-		return
-	
-	if event.is_echo():
-		return
-	
-	if event.is_pressed():
+	if not event is InputEventKey or event.is_echo() or event.is_pressed():
 		return
 	
 	if event.get_keycode() in keys_to_dirs:

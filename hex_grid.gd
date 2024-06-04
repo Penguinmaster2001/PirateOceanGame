@@ -5,7 +5,7 @@ const TILE_SIZE := 25.0
 const SIDE_RATIO := cos(PI / 6.0)
 const HEX_TILE := preload("res://hex_tile.tscn")
 
-@export_range (1, 500) var grid_size := 10
+@export_range (1, 300) var grid_size := 10
 
 
 var hex_textures := [ ]
@@ -20,17 +20,20 @@ func _ready() -> void:
 
 	HexMap.generate_triangle(grid_size);
 
-	# HexMap.generate_terrain_types()
+	# HexMap.collapse_next_hex()
 
-	# _display_map(HexMap.collapsed)
+	_display_map(HexMap.get_collapsed_hexes())
+
 
 
 func _process(_delta: float) -> void:
-	# for i in range(20):
-	# 	_display_hex(HexMap.generate_terrain_types())
+	if HexMap.collapsed_all_hexes():
+		return
+
+	for i in range(40):
+		_display_hex(HexMap.collapse_next_hex())
 
 	# HexMap.display_data()
-	pass
 
 
 
