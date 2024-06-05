@@ -11,6 +11,7 @@ var target_pos := Vector3.ZERO
 var travel_list := [ ]
 
 var click_marker : MeshInstance3D
+var boat_model : Node3D
 
 
 var keys_to_dirs := {
@@ -26,6 +27,7 @@ var keys_to_dirs := {
 
 func _ready() -> void:
 	click_marker = get_parent().get_child(2)
+	boat_model = get_child(1)
 
 
 
@@ -33,15 +35,17 @@ func _process(delta: float) -> void:
 	var dist_to_target := position.distance_to(target_pos)
 	var dir_to_target := position.direction_to(target_pos)
 
-	position += (travel_speed * clampf(dist_to_target / 10.0, 0.25, 3.0) * delta) * dir_to_target
+	if dist_to_target > 5.0:
+		position += (travel_speed * clampf(dist_to_target / 10.0, 0.25, 3.0) * delta) * dir_to_target
 
-	if dist_to_target < 20.0:
+	if dist_to_target < 25.0:
 		cur_hex = next_hex
 		if travel_list.is_empty():
 			return
 		
 		next_hex = travel_list.pop_front()
 		target_pos = next_hex.get_world_coords(25.0)
+		boat_model.call("update_look_at_target", target_pos)
 
 
 
@@ -70,4 +74,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		click_marker.position = intersection
 
 		var target_hex := HexMap.get_hex_at_world_coords(intersection.x, intersection.z)
-		travel_list.append_array(HexMap.get_hexes_on_line(cur_hex, target_hex))
+		# travel_list.append_array(HexMap.get_hexes_on_line(cur_hex, target_hex))
+		travel_list.append_array(HexMap.find_path(cur_hex, target_hex))
+
+		# print("~~~~~")
+		# print(intersection)
+		# print("Current: ", cur_hex)
+		# print("Target: ", target_hex)
+		# print(travel_list)

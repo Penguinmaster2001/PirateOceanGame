@@ -154,5 +154,5 @@ func _to_string() -> String:
 
 	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_types, allowed_type_names, self._collapsed, HexMap.type_names[self.terrain_type]]
 	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_edge_types, self._collapsed, HexMap.type_names[self.terrain_type]]
-	return "WfcHex(_q: %d, _r: %d)" % [self._q, self._r]
+	return "WfcHex(q: %d, r: %d, traversable: %s)" % [self._q, self._r, HexMap.type_traversable[self.terrain_type]]
 	

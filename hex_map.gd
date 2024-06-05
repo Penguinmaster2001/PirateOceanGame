@@ -20,6 +20,7 @@ var type_edges := [ ]
 var all_types := [ ]
 var type_names := [ ]
 var type_weights := [ ]
+var type_traversable := [ ]
 
 
 
@@ -42,14 +43,20 @@ func generate_triangle(side_length: int) -> void:
 		for r in range(side_length - q):
 			_add_hex(q, r)
 	
-	seed_type(10, type_names.find("super_deep_water"))
-	seed_type(5, type_names.find("mountain"))
+	collapse_coords(0, 0, "super_deep_water")
+	collapse_coords(1, 0, "super_deep_water")
+	collapse_coords(0, 1, "super_deep_water")
+	
+	seed_type(10, "super_deep_water")
+	seed_type(5, "mountain")
 
 
 
-func seed_type(num: int, type: int) -> void:
+func seed_type(num: int, type: String) -> void:
+	var type_ind := type_names.find(type)
+
 	for i in range(num):
-		collapse_hex(_not_collapsed.pick_random(), type)
+		collapse_hex(_not_collapsed.pick_random(), type_ind)
 
 
 
@@ -71,6 +78,8 @@ func get_hex_at_world_coords(x: float, y: float) -> Hex:
 
 
 
+# Find the hexes on the line between two hexes, and return a list of them in order
+# Includes end, does not include start
 func get_hexes_on_line(start: Hex, end: Hex) -> Array:
 	if start == null:
 		start = get_hex(0, 0)
@@ -86,6 +95,54 @@ func get_hexes_on_line(start: Hex, end: Hex) -> Array:
 		line_hexes.append(get_hex(nearest_hex._q, nearest_hex._r))
 
 	return line_hexes
+
+
+
+# Find the shortest path between two hexes using the A* alg
+# return a list of the hexes in order
+func find_path(start: Hex, end: Hex) -> Array:
+	if start == null:
+		start = get_hex(0, 0)
+
+	if end == null:
+		return [ ]
+
+	# Can't path to or from a non-traversable hex
+	if not type_traversable[start.terrain_type] or not type_traversable[end.terrain_type]:
+		return [ ]
+
+	# Treat like a queue
+	# Enqueue: push_front()
+	# dequeue: pop_back()
+	var frontier := [start]
+	var reached := [start]
+	var came_from := { }
+	came_from[start] = null
+
+	while not frontier.is_empty():
+		var current : Hex = frontier.pop_back()
+
+		# We're done searching
+		if current == end:
+			frontier.clear()
+			break
+
+		for next: Hex in HexMap.get_hex_neighbors(current).filter(func(hex: Hex) -> bool: return hex != null):
+			if type_traversable[next.terrain_type] and not reached.has(next):
+				frontier.push_front(next)
+				came_from[next] = current
+				reached.append(next)
+	
+	var cur := end
+	var path := [ ]
+
+	while cur != null and cur != start:
+		path.append(cur)
+		cur = came_from.get(cur, null)
+
+	path.reverse()
+
+	return path
 
 
 
@@ -163,13 +220,13 @@ func display_data() -> void:
 
 
 
-func collapse_coords(q: int, r: int, type: int) -> void:
+func collapse_coords(q: int, r: int, type: String) -> void:
 	var hex := get_hex(q, r)
 
 	if hex == null:
 		return
 
-	collapse_hex(hex, type)
+	collapse_hex(hex, type_names.find(type))
 
 
 
@@ -286,11 +343,14 @@ func get_hex_types(path: String) -> Array:
 	var edges_from_json := [ ]
 	var weights_from_json := [ ]
 	var materials_from_json := [ ]
+	var traversables_from_json := [ ]
 
+	# Get the data from the json, with defaults
 	for tile_type: Dictionary in json_parse.values():
-		edges_from_json.append(tile_type["edges"])
-		weights_from_json.append(tile_type["weight"])
-		materials_from_json.append(tile_type["material"])
+		edges_from_json.append(tile_type.get("edges", [0, 0, 0, 0, 0, 0]))
+		weights_from_json.append(tile_type.get("weight", 0))
+		materials_from_json.append(tile_type.get("material", "res://TileTextures/undefined.tres"))
+		traversables_from_json.append(tile_type.get("traversable", false))
 	
 
 	var type_materials := [ ]
@@ -304,6 +364,7 @@ func get_hex_types(path: String) -> Array:
 			type_names.append(names_from_json[i])
 			type_weights.append(weights_from_json[i] / symmetric_edge_arrays.size())
 			type_materials.append(materials_from_json[i])
+			type_traversable.append(traversables_from_json[i])
 	
 	for i in range(type_edges.size()):
 		all_types.append(i)

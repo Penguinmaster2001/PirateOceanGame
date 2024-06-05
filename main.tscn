@@ -45,9 +45,9 @@ far = 10000.0
 
 [node name="BoatModel" type="Node3D" parent="Boat"]
 script = ExtResource("2_cfsog")
-speed = 0.576
-rockage = 1.184
-rollage = 4.231
+speed = 1.275
+rockage = 7.653
+rollage = 4.983
 
 [node name="TestBoat" type="MeshInstance3D" parent="Boat/BoatModel"]
 material_override = SubResource("StandardMaterial3D_3ja0d")
