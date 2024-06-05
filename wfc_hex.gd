@@ -147,10 +147,12 @@ func is_collapsed() -> bool:
 
 
 func _to_string() -> String:
-	var allowed_type_names := [ ]
+	# var allowed_type_names := [ ]
 
-	for type: int in _allowed_types:
-		allowed_type_names.append(HexMap.type_names[type])
+	# for type: int in _allowed_types:
+	# 	allowed_type_names.append(HexMap.type_names[type])
 
 	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_types, allowed_type_names, self._collapsed, HexMap.type_names[self.terrain_type]]
-	return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_edge_types, self._collapsed, HexMap.type_names[self.terrain_type]]
+	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_edge_types, self._collapsed, HexMap.type_names[self.terrain_type]]
+	return "WfcHex(_q: %d, _r: %d)" % [self._q, self._r]
+	

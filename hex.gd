@@ -64,6 +64,51 @@ func sub(other: Hex) -> Hex:
 func scale(f: int) -> Hex:
 	return Hex.new(self._q * f, self._r * f)
 
+func hex_lerp(other: Hex, t: float) -> Hex:
+	return Hex.hex_coord_round(lerpf(self._q, other._q, t), lerpf(self._r, other._r, t))
+
+
+
+static func hex_coord_lerp(q_i: float, r_i: float, q_f: float, r_f: float, t: float) -> Array:
+	return [lerp(q_i, q_f, t), lerp(r_i, r_f, t)]
+
+
+
+static func hex_coord_round(q_i: float, r_i: float) -> Hex:
+	var q := roundi(q_i)
+	var r := roundi(r_i)
+	var s := -q - r
+
+	var q_diff := absf(q - float(q_i))
+	var r_diff := absf(r - float(r_i))
+	var s_diff := absf(s - float(-q_i - r_i))
+	
+	if q_diff > r_diff and q_diff > s_diff:
+		q = -r - s
+	elif r_diff > s_diff:
+		r = -q - s
+
+	return Hex.new(q, r)
+
+
+
+# static func hex_coord_mag(q: float, r: float) -> float:
+# 	var s := -q - r
+
+# 	return (abs(q) + abs(r) + abs(s)) / 2.0
+
+
+
+# static func hex_coord_sub(q_i: float, r_i: float, q_f: float, r_f: float) -> Array:
+# 	return [q_i - q_f, r_i - r_f]
+
+
+
+# static func hex_coord_dist(q_i: float, r_i: float, q_f: float, r_f: float) -> float:
+# 	var subtracted := hex_coord_sub(q_i, r_i, q_f, r_f)
+
+# 	return hex_coord_mag(subtracted[0], subtracted[1])
+
 
 func get_neighbor_coord(direction: int) -> Hex:
 	return self.add(directions[direction % 6])

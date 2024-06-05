@@ -59,13 +59,33 @@ func get_hex(q: int, r: int) -> Hex:
 
 
 
-func get_hex_world_coords(x: float, y: float) -> Hex:
+func get_hex_at_world_coords(x: float, y: float) -> Hex:
 	var hex_size := 25.0
 
 	var q := ((x * sqrt(3) / 3.0)  -  (y / 3.0)) / hex_size
 	var r := (y * 2.0 / 3.0) / hex_size
 
-	return get_hex(roundi(q), roundi(r))
+
+	var rounded_coords := Hex.hex_coord_round(q, r)
+	return get_hex(rounded_coords._q, rounded_coords._r)
+
+
+
+func get_hexes_on_line(start: Hex, end: Hex) -> Array:
+	if start == null:
+		start = get_hex(0, 0)
+
+	if end == null:
+		return [ ]
+
+	var dist := start.get_distance(end)
+	var line_hexes := []
+
+	for i in range(1, dist + 1):
+		var nearest_hex := start.hex_lerp(end, float(i) / float(dist))
+		line_hexes.append(get_hex(nearest_hex._q, nearest_hex._r))
+
+	return line_hexes
 
 
 

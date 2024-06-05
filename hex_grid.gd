@@ -30,7 +30,7 @@ func _process(_delta: float) -> void:
 	if HexMap.collapsed_all_hexes():
 		return
 
-	for i in range(40):
+	for i in range(60):
 		_display_hex(HexMap.collapse_next_hex())
 
 	# HexMap.display_data()

@@ -1,10 +1,16 @@
 extends Node3D
 
 # @export_range (0.0, 300.0) var travel_speed := 25.0
-var travel_speed := 300.0
+var travel_speed := 100.0
 
 var cur_hex: Hex
+var next_hex: Hex
 var target_pos := Vector3.ZERO
+
+# Array of the hexes the boat is following
+var travel_list := [ ]
+
+var click_marker : MeshInstance3D
 
 
 var keys_to_dirs := {
@@ -19,7 +25,7 @@ var keys_to_dirs := {
 
 
 func _ready() -> void:
-	cur_hex = HexMap.get_hexes()[0]
+	click_marker = get_parent().get_child(2)
 
 
 
@@ -27,8 +33,15 @@ func _process(delta: float) -> void:
 	var dist_to_target := position.distance_to(target_pos)
 	var dir_to_target := position.direction_to(target_pos)
 
-	if dist_to_target > 1.0:
-		position += (travel_speed * clampf(dist_to_target / 25.0, 0.25, 3.0) * delta) * dir_to_target
+	position += (travel_speed * clampf(dist_to_target / 10.0, 0.25, 3.0) * delta) * dir_to_target
+
+	if dist_to_target < 20.0:
+		cur_hex = next_hex
+		if travel_list.is_empty():
+			return
+		
+		next_hex = travel_list.pop_front()
+		target_pos = next_hex.get_world_coords(25.0)
 
 
 
@@ -53,13 +66,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		var direction := camera.project_ray_normal(event.position)
 
 		var intersection := origin - ((origin.y / direction.y) * direction)
-		print(HexMap.get_hex_world_coords(intersection.x, intersection.z))
 
-		return
+		click_marker.position = intersection
 
-		
-	if not event is InputEventKey or event.is_echo() or event.is_pressed():
-		return
-	
-	if event.get_keycode() in keys_to_dirs:
-		_change_tile(keys_to_dirs[event.get_keycode()])
+		var target_hex := HexMap.get_hex_at_world_coords(intersection.x, intersection.z)
+		travel_list.append_array(HexMap.get_hexes_on_line(cur_hex, target_hex))
