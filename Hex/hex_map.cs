@@ -355,34 +355,4 @@ public static class HexMap
 	{
 		return (not_collapsed.Count == 0);
 	}
-	/*
-# Find the hexes on the line between two hexes, and return a list of them in order
-# Includes end, does not include start
-func get_hexes_on_line(start: Hex, end: Hex) -> Array:
-	if start == null:
-		start = get_hex(0, 0)
-
-	if end == null:
-		return [ ]
-
-	var dist := start.get_distance(end)
-	var line_hexes := []
-
-	for i in range(1, dist + 1):
-		var nearest_hex := start.hex_lerp(end, float(i) / float(dist))
-		line_hexes.append(get_hex(nearest_hex._q, nearest_hex._r))
-
-	return line_hexes
-
-
-
-# Return a list of all the _hexes in the map
-func get_hexes() -> Array:
-	return _hexes.values()
-
-
-
-func collapsed_all_hexes() -> bool:
-	return _not_collapsed.size() == 0
-	 */
 }

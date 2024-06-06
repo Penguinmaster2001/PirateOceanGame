@@ -122,9 +122,4 @@ public partial class Hex : Node3D
 		
 		return new Hex(q, r);
 	}
-
-	/*
-static func hex_coord_lerp(q_i: float, r_i: float, q_f: float, r_f: float, t: float) -> Array:
-	return [lerp(q_i, q_f, t), lerp(r_i, r_f, t)]
-	*/
 }
