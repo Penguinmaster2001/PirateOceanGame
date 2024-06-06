@@ -1,5 +1,5 @@
 
-extends Node
+# extends Node
 
 
 # This is so incredibly badly organized
@@ -46,7 +46,7 @@ func generate_triangle(side_length: int) -> void:
 	collapse_coords(0, 0, "super_deep_water")
 	collapse_coords(1, 0, "super_deep_water")
 	collapse_coords(0, 1, "super_deep_water")
-	
+
 	seed_type(10, "super_deep_water")
 	seed_type(5, "mountain")
 
@@ -133,6 +133,7 @@ func find_path(start: Hex, end: Hex) -> Array:
 				came_from[next] = current
 				reached.append(next)
 	
+	# Build the path
 	var cur := end
 	var path := [ ]
 

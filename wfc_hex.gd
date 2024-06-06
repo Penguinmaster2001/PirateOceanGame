@@ -39,11 +39,6 @@ func set_allowed_types(new_allowed_types: Array) -> void:
 
 
 
-func set_edges(new_edges: Array) -> void:
-	_edges = new_edges
-
-
-
 # Get an edge
 func get_edge(edge: int) -> int:
 	return _edges[edge % 6]
@@ -102,9 +97,6 @@ func _update_edge_allowed_types(edge: int) -> void:
 
 		if not edge_allowed_edges.has(type_edges[edge]):
 			edge_allowed_edges.append(type_edges[edge])
-
-		if edge_allowed_edges.size() == 6:
-			break
 
 	_allowed_edge_types[edge] = edge_allowed_edges
 

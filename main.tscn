@@ -1,10 +1,10 @@
 [gd_scene load_steps=9 format=3 uid="uid://dr0pduna28241"]
 
-[ext_resource type="Script" path="res://hex_grid.gd" id="1_x6edi"]
+[ext_resource type="Script" path="res://Hex/HexGrid.cs" id="1_uydds"]
 [ext_resource type="Script" path="res://boat_model.gd" id="2_cfsog"]
+[ext_resource type="Script" path="res://Boat.cs" id="2_lealb"]
 [ext_resource type="Script" path="res://camera_rig.gd" id="2_lhw1w"]
 [ext_resource type="ArrayMesh" uid="uid://ch1kb78ipsvgc" path="res://TestBoat.obj" id="2_oxh7l"]
-[ext_resource type="Script" path="res://boat.gd" id="3_rebng"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5ntly"]
 shading_mode = 0
@@ -21,8 +21,8 @@ clearcoat_roughness = 0.0
 [node name="Main" type="Node3D"]
 
 [node name="HexGrid" type="Node3D" parent="."]
-script = ExtResource("1_x6edi")
-grid_size = 100
+script = ExtResource("1_uydds")
+grid_size = 500
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.25, -0.433013, 0.5, 0.433013, 0.75, 7.19671e-09, -0.866025, 0.5, 0, 0, 0)
@@ -33,7 +33,7 @@ mesh = SubResource("SphereMesh_nltkp")
 skeleton = NodePath("../Boat")
 
 [node name="Boat" type="Node3D" parent="."]
-script = ExtResource("3_rebng")
+script = ExtResource("2_lealb")
 
 [node name="CameraRig" type="Node3D" parent="Boat"]
 script = ExtResource("2_lhw1w")

@@ -21,7 +21,7 @@
 			-2,
 			-2
 		],
-		"weight": 20,
+		"weight": 30,
 		"traversable": true,
 		"material": "res://TileTextures/super_deep_water.tres"
 	},
@@ -34,7 +34,7 @@
 			-1,
 			-1
 		],
-		"weight": 20,
+		"weight": 30,
 		"traversable": true,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
@@ -47,7 +47,7 @@
 			-1,
 			-1
 		],
-		"weight": 10,
+		"weight": 20,
 		"traversable": true,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
@@ -60,7 +60,7 @@
 			-1,
 			-1
 		],
-		"weight": 30,
+		"weight": 40,
 		"traversable": true,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
@@ -73,7 +73,7 @@
 			-1,
 			-1
 		],
-		"weight": 30,
+		"weight": 40,
 		"traversable": true,
 		"material": "res://TileTextures/deep_water.tres"
 	},
@@ -86,7 +86,7 @@
 			1,
 			1
 		],
-		"weight": 20,
+		"weight": 30,
 		"traversable": true,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
@@ -99,7 +99,7 @@
 			1,
 			1
 		],
-		"weight": 10,
+		"weight": 40,
 		"traversable": true,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
@@ -112,7 +112,7 @@
 			1,
 			1
 		],
-		"weight": 20,
+		"weight": 30,
 		"traversable": true,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
@@ -150,7 +150,7 @@
 			2,
 			2
 		],
-		"weight": 30,
+		"weight": 10,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"shore_corner_convex": {
@@ -162,7 +162,7 @@
 			2,
 			2
 		],
-		"weight": 20,
+		"weight": 30,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"shore_corner_concave": {
@@ -174,7 +174,7 @@
 			2,
 			2
 		],
-		"weight": 20,
+		"weight": 10,
 		"material": "res://TileTextures/shore.tres"
 	},
 	"forest": {
