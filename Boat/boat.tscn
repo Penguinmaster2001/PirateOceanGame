@@ -1,0 +1,38 @@
+[gd_scene load_steps=8 format=3 uid="uid://b0gbudfuwd6n1"]
+
+[ext_resource type="Script" path="res://Boat/Boat.cs" id="1_3q6mg"]
+[ext_resource type="Texture2D" uid="uid://bhdsety6bwj1v" path="res://SelectionTexture.png" id="2_85thd"]
+[ext_resource type="Script" path="res://Boat/boat_model.gd" id="3_kjj1n"]
+[ext_resource type="ArrayMesh" uid="uid://ch1kb78ipsvgc" path="res://Boat/TestBoat.obj" id="4_eewhl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sqpiw"]
+transparency = 1
+albedo_texture = ExtResource("2_85thd")
+
+[sub_resource type="QuadMesh" id="QuadMesh_bejho"]
+material = SubResource("StandardMaterial3D_sqpiw")
+size = Vector2(15, 15)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3ja0d"]
+albedo_color = Color(0.354895, 0.243161, 0.145351, 1)
+metallic_specular = 0.0
+clearcoat_roughness = 0.0
+
+[node name="Boat" type="Node3D"]
+script = ExtResource("1_3q6mg")
+
+[node name="SelectionCircle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.4)
+mesh = SubResource("QuadMesh_bejho")
+
+[node name="BoatModel" type="Node3D" parent="."]
+script = ExtResource("3_kjj1n")
+speed = 1.275
+rockage = 7.653
+rollage = 4.983
+
+[node name="TestBoat" type="MeshInstance3D" parent="BoatModel"]
+material_override = SubResource("StandardMaterial3D_3ja0d")
+mesh = ExtResource("4_eewhl")
+skeleton = NodePath("../../..")

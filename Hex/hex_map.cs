@@ -224,6 +224,7 @@ public static class HexMap
 	/*
 	 * Return the path between two hexes
 	 * Tries to make as many straight lines as possible
+	 * Uses a modified version of the A* alg
 	 */
 	public static List<Hex> find_path(Hex start, Hex end)
 	{
@@ -307,7 +308,7 @@ public static class HexMap
 				}
 			}
 
-			path.AddRange(get_hexes_on_line(line_start, end));
+			path.Add(end);
 
 			// Hex current = start;
 
@@ -336,6 +337,10 @@ public static class HexMap
 
 		if (end == null)
 			return new();
+
+		// If start == end we get a division by zero
+		if (start == end)
+			return new() {start};
 
 		int dist = start.get_distance(end);
 		List<Hex> line_hexes = new();
