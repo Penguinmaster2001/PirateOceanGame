@@ -5,7 +5,7 @@ using Godot;
  * 
  * 
  */
-public partial class Hex : Node3D
+public partial class Hex : GodotObject
 {
 	private int q;
 	public int get_q() => q;
@@ -122,4 +122,11 @@ public partial class Hex : Node3D
 		
 		return new Hex(q, r);
 	}
+
+
+
+    public override string ToString()
+    {
+        return "Hex(" + q + ", " + r + ")" + "\n" + HexTypes.get_name(terrain_type);
+    }
 }

@@ -28,11 +28,9 @@ mesh = SubResource("QuadMesh_bejho")
 
 [node name="BoatModel" type="Node3D" parent="."]
 script = ExtResource("3_kjj1n")
-speed = 1.275
-rockage = 7.653
-rollage = 4.983
 
 [node name="TestBoat" type="MeshInstance3D" parent="BoatModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
 material_override = SubResource("StandardMaterial3D_3ja0d")
 mesh = ExtResource("4_eewhl")
 skeleton = NodePath("../../..")

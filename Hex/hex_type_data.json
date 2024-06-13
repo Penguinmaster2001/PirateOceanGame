@@ -139,6 +139,7 @@
 			1
 		],
 		"weight": 1,
+		"traversable": true,
 		"material": "res://TileTextures/port.tres"
 	},
 	"shore_straight": {

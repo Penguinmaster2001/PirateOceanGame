@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://de16bgc4gxdij"]
 
-[ext_resource type="ArrayMesh" uid="uid://2qqdrs0ng837" path="res://hexagon.obj" id="1_7uugj"]
+[ext_resource type="ArrayMesh" uid="uid://2qqdrs0ng837" path="res://Hex/hexagon.obj" id="1_7uugj"]
 [ext_resource type="Material" uid="uid://cnruwwbp1uqc1" path="res://TileTextures/deep_water_transition.tres" id="3_vfxt2"]
 
 [node name="HexTile" type="Node3D"]

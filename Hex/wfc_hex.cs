@@ -152,6 +152,13 @@ public partial class WfcHex : Hex
 		edge_types = HexTypes.get_type_edges(type);
 	}
 
+
+
+    public override string ToString()
+    {
+        return "Wfc" + base.ToString();
+    }
+
     /*
 
 func set_allowed_types(new_allowed_types: Array) -> void:

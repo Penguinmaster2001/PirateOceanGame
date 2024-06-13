@@ -9,48 +9,52 @@ public static class HexTypes
 	private static List<int>    all_types = new();
 	public  static List<int> get_all_types() => all_types;
 
-	private static List<String>	type_names = new();
-	private static List<int[]>  type_edges = new();
-	private static List<int> 	type_weights = new();
-	private static List<String> type_materials = new();
-	public static List<String> get_type_material_paths() => type_materials;
+	private static List<string>	type_names = new();
+	public static string get_name(int type) => type_names[type];
+
+	private static List<int[]> type_edges = new();
+
+	private static List<int> type_weights = new();
+
+	private static List<string> type_materials = new();
+	public static List<string> get_type_material_paths() => type_materials;
 	
-	private static List<bool> 	type_traversable = new();
+	private static List<bool> type_traversable = new();
 	public static bool is_type_traversable(int type) => type_traversable[type];
 
 	private static int num_types = 0;
 
-	private const String hex_type_data_json_path = "res://hex_type_data.json";
+	private const string hex_type_data_json_path = "res://Hex/hex_type_data.json";
 
 
 	static HexTypes()
 	{
 		// Read from json
 		FileAccess file = FileAccess.Open(hex_type_data_json_path, FileAccess.ModeFlags.Read);
-		String data = file.GetAsText();
+		string data = file.GetAsText();
 		file.Close();
 
 		Json json = new();
 		json.Parse(data);
 
 		// Ew
-		Godot.Collections.Dictionary<String, Godot.Collections.Dictionary<String, Variant>> json_dict
-				= json.Data.AsGodotDictionary<String, Godot.Collections.Dictionary<String, Variant>>();
+		Godot.Collections.Dictionary<string, Godot.Collections.Dictionary<string, Variant>> json_dict
+				= json.Data.AsGodotDictionary<string, Godot.Collections.Dictionary<string, Variant>>();
 
-		List<String> names_from_json = json_dict.Keys.ToList<String>();
+		List<string> names_from_json = json_dict.Keys.ToList<string>();
 		List<int[]>  edges_from_json = new();
 		List<int> 	 weights_from_json = new();
-		List<String> materials_from_json = new();
+		List<string> materials_from_json = new();
 		List<bool> 	 traversable_from_json = new();
 
 		int num_json_types = 0;
 
 
-		foreach (Godot.Collections.Dictionary<String, Variant> hex_type_data in json_dict.Values)
+		foreach (Godot.Collections.Dictionary<string, Variant> hex_type_data in json_dict.Values)
 		{
 			edges_from_json.Add((int[]) hex_type_data["edges"]);
 			weights_from_json.Add((int) hex_type_data["weight"]);
-			materials_from_json.Add((String) hex_type_data["material"]);
+			materials_from_json.Add((string) hex_type_data["material"]);
 
 			if(hex_type_data.TryGetValue("traversable", out Variant is_traversable))
 				traversable_from_json.Add((bool) is_traversable);
@@ -158,7 +162,7 @@ public static class HexTypes
 	}
 
 
-	public static int get_type_from_name(String name)
+	public static int get_type_from_name(string name)
 	{
 		int index = type_names.IndexOf(name);
 		return index == -1 ? 0 : index;

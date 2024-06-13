@@ -1,5 +1,8 @@
 using Godot;
 
+// This needs to support rectangles in screen space <=> arbitrary convex quadrilaterals in world space
+// Maybe need a new class to replace AABB
+
 public partial class SelectionBox : Node3D
 {
     [Signal]
@@ -8,13 +11,13 @@ public partial class SelectionBox : Node3D
 
     private Camera3D camera;
     private MeshInstance3D box;
-    private Vector2 startMousePos;
-    private Vector2 endMousePos;
+    private Vector2 start_mouse_pos;
+    private Vector2 end_mouse_pos;
 
     private Vector3 selection_start;
     private Vector3 selection_end;
 
-    private bool isSelecting = false;
+    private bool is_selecting = false;
 
     public override void _Ready()
     {
@@ -29,34 +32,34 @@ public partial class SelectionBox : Node3D
     {
         if (Input.IsActionJustPressed("ui_select"))
         {
-            startMousePos = GetViewport().GetMousePosition();
-            isSelecting = true;
+            start_mouse_pos = GetViewport().GetMousePosition();
+            is_selecting = true;
             box.Visible = true;
         }
 
-        if (isSelecting)
+        if (is_selecting)
         {
-            endMousePos = GetViewport().GetMousePosition();
+            end_mouse_pos = GetViewport().GetMousePosition();
             UpdateSelectionBox();
         }
 
         if (Input.IsActionJustReleased("ui_select"))
         {
             SelectObjects();
-            isSelecting = false;
+            is_selecting = false;
             box.Visible = false;
         }
     }
 
 	private void UpdateSelectionBox()
 	{
-        Vector3 start_origin = camera.ProjectRayOrigin(startMousePos);
-        Vector3 start_direction = camera.ProjectRayNormal(startMousePos);
+        Vector3 start_origin = camera.ProjectRayOrigin(start_mouse_pos);
+        Vector3 start_direction = camera.ProjectRayNormal(start_mouse_pos);
 
         selection_start = start_origin - (start_direction * start_origin.Y / start_direction.Y);
 
-        Vector3 end_origin = camera.ProjectRayOrigin(endMousePos);
-        Vector3 end_direction = camera.ProjectRayNormal(endMousePos);
+        Vector3 end_origin = camera.ProjectRayOrigin(end_mouse_pos);
+        Vector3 end_direction = camera.ProjectRayNormal(end_mouse_pos);
 
         selection_end = start_origin - (end_direction * end_origin.Y / end_direction.Y);
         

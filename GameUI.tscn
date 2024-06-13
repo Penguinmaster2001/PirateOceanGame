@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://cpy6n8cxj0dno"]
+
+[ext_resource type="Theme" uid="uid://b2n7pghrxqsdv" path="res://theme.theme" id="1_fwyr2"]
+
+[node name="GameUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_fwyr2")
+
+[node name="BoatInfo" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("1_fwyr2")
+
+[node name="Selector" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 553.0
+offset_top = 249.0
+offset_right = 593.0
+offset_bottom = 289.0
+
+[node name="SelectionRect" type="NinePatchRect" parent="Selector"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+draw_center = false
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
