@@ -62,6 +62,9 @@ public partial class FleetController : Node3D
 
 	public void on_hex_selection(Hex hex)
 	{
+		if (hex == null)
+			return;
+
 		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.get_terrain_type()))
 			move_boats(hex.get_world_coords());
 
@@ -73,7 +76,6 @@ public partial class FleetController : Node3D
 
 	private void move_boats(Vector3 pos)
 	{
-
 		Hex waypoint = HexMap.get_hex_at_world_coords(pos.X, pos.Z);
 
 		EmitSignal(SignalName.AddedNewWaypoint, waypoint);
@@ -81,14 +83,14 @@ public partial class FleetController : Node3D
 
 
 
-	public void select_boats(Aabb selection_box)
+	public void select_boats(SelectionPolygon selection_quad)
 	{
 		selected_boats.Clear();
 		EmitSignal(SignalName.SelectionCleared);
 
 		foreach (Boat boat in boats)
 		{
-			if (selection_box.HasPoint(boat.Position))
+			if (selection_quad.has_point(boat.Position))
 			{
 				selected_boats.Add(boat);
 				boat.Call(nameof(Boat.on_selection));
