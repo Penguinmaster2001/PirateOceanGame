@@ -13,10 +13,21 @@ public class Port
 
     private int name = 0;
 
+    private Hex hex;
 
-    public Port()
+
+    public Port(Hex hex)
     {
         name = rng.RandiRange(1000, 9999);
+
+        this.hex = hex;
+    }
+
+
+
+    public Vector3 get_spawn_location()
+    {
+        return hex.get_world_coords();
     }
 
 

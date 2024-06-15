@@ -29,7 +29,7 @@ public partial class FleetController : Node3D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		boat_info = GetNode<Label>("/root/Main/GameUI/BoatInfo");
+		boat_info = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
 
 		main_camera = GetViewport().GetCamera3D();
 	}
@@ -50,9 +50,9 @@ public partial class FleetController : Node3D
 		Boat new_boat = boat_scene.Instantiate<Boat>();
 		new_boat.Translate(new_boat_coords);
 
-		Connect("AddedNewWaypoint", new Callable(new_boat, nameof(Boat.add_waypoint)));
-		Connect("SelectedBoats", new Callable(new_boat, nameof(Boat.on_selection)));
-		Connect("SelectionCleared", new Callable(new_boat, nameof(Boat.on_selection_cleared)));
+		Connect(SignalName.AddedNewWaypoint, new Callable(new_boat, nameof(Boat.add_waypoint)));
+		Connect(SignalName.SelectedBoats, new Callable(new_boat, nameof(Boat.on_selection)));
+		Connect(SignalName.SelectionCleared, new Callable(new_boat, nameof(Boat.on_selection_cleared)));
 
 		GetParent().AddChild(new_boat);
 		boats.Add(new_boat);
@@ -67,9 +67,6 @@ public partial class FleetController : Node3D
 
 		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.get_terrain_type()))
 			move_boats(hex.get_world_coords());
-
-		// else if(HexTypes.get_name(hex.get_terrain_type()).Contains("port"))
-		// 	add_new_boat(hex.get_world_coords());
 	}
 
 
@@ -97,8 +94,12 @@ public partial class FleetController : Node3D
 			}
 		}
 
-		if (selected_boats.Count > 0)
+		if (selected_boats.Count <= 0)
+			boat_info.Text = "No boats selected";
+		else if (selected_boats.Count == 1)
 			boat_info.Text = selected_boats[0].ToString();
+		else
+			boat_info.Text = selected_boats.Count + " Boats Selected";
 	}
 
 

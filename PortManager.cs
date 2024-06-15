@@ -37,7 +37,7 @@ public partial class PortManager : Control
 
     public void on_hex_selection(Hex hex)
     {
-		if(!HexTypes.get_name(hex.get_terrain_type()).Contains("port")) // There needs to be a better way to do this
+		if(hex == null || !HexTypes.get_name(hex.get_terrain_type()).Contains("port")) // There needs to be a better way to do this
 		{
             deselect_port();
 
@@ -61,9 +61,13 @@ public partial class PortManager : Control
 
         current_port_ui = port_ui_scene.Instantiate<Control>();
 
-        game_ui.AddChild(current_port_ui);
+        AddChild(current_port_ui);
 
-        current_port_ui.GetNode<Label>("PortName").Text = selected_port.ToString();
+        Button new_boat_button = (Button) current_port_ui.FindChild("NewBoatButton");
+        new_boat_button.Pressed += on_new_boat_button_pressed;
+
+        Label port_name_label = (Label) current_port_ui.FindChild("PortName");
+        port_name_label.Text = selected_port.ToString();
     }
 
 
@@ -85,6 +89,13 @@ public partial class PortManager : Control
 
     private void add_new_port(Hex hex)
     {
-        ports.Add(hex, new());
+        ports.Add(hex, new(hex));
+    }
+
+
+
+    public void on_new_boat_button_pressed()
+    {
+        EmitSignal(SignalName.SpawnNewBoat, selected_port.get_spawn_location());
     }
 }
