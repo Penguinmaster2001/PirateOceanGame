@@ -1,14 +1,11 @@
 using Godot;
-using Godot.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
-// This needs to be split up into a navigation class and boat management class
-// and maybe a Node3D class as well
+// The navigation stuff needs to go into its own class
 
 public partial class Boat : Node3D
 {
-	// Navigation stuff
+	// Navigation fields
 	private float travel_speed = 100.0f;
 	private Hex cur_hex;
 	private Hex next_hex;
@@ -31,14 +28,14 @@ public partial class Boat : Node3D
 	private ResourceManager resources = new();
 
 
-	RandomNumberGenerator rng = new();
+	private RandomNumberGenerator rng = new();
 
 
 
 	public override void _Ready()
 	{
-		boat_model = (Node3D) GetNode("BoatModel");
-		selection_circle = (Node3D) GetNode("SelectionCircle");
+		boat_model = GetNode<Node3D>("BoatModel");
+		selection_circle = GetNode<Node3D>("SelectionCircle");
 		
 		selection_circle.Visible = false;
 		target_pos = Position;

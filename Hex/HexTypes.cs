@@ -6,7 +6,7 @@ using System.Linq;
 public static class HexTypes
 {
 	// As more of these get added, I'm going to have to hold them into a data structure
-	private static List<int>    all_types = new();
+	private static List<int> all_types = new();
 	public  static List<int> get_all_types() => all_types;
 
 	private static List<string>	type_names = new();

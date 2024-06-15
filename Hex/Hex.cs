@@ -5,7 +5,7 @@ using Godot;
  * 
  * 
  */
-public partial class Hex : GodotObject
+public partial class Hex : GodotObject // To allow signals to carry Hexes
 {
 	private int q;
 	public int get_q() => q;

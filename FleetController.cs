@@ -14,7 +14,7 @@ public partial class FleetController : Node3D
 	public delegate void SelectionClearedEventHandler();
 
 
-	private PackedScene boat_scene = (PackedScene) GD.Load("res://Boat/boat.tscn");
+	private PackedScene boat_scene = GD.Load<PackedScene>("res://Boat/boat.tscn");
 
 	private List<Boat> boats = new();
 	private List<Boat> selected_boats = new();
@@ -43,11 +43,11 @@ public partial class FleetController : Node3D
 
 
 
-	private void add_new_boat(Vector3 new_boat_coords)
+	public void add_new_boat(Vector3 new_boat_coords)
 	{
 		new_boat_coords.Y = 0;
 
-		Boat new_boat = (Boat) boat_scene.Instantiate();
+		Boat new_boat = boat_scene.Instantiate<Boat>();
 		new_boat.Translate(new_boat_coords);
 
 		Connect("AddedNewWaypoint", new Callable(new_boat, nameof(Boat.add_waypoint)));
@@ -68,8 +68,8 @@ public partial class FleetController : Node3D
 		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.get_terrain_type()))
 			move_boats(hex.get_world_coords());
 
-		else if(HexTypes.get_name(hex.get_terrain_type()).Contains("port"))
-			add_new_boat(hex.get_world_coords());
+		// else if(HexTypes.get_name(hex.get_terrain_type()).Contains("port"))
+		// 	add_new_boat(hex.get_world_coords());
 	}
 
 
@@ -122,31 +122,4 @@ public partial class FleetController : Node3D
 		if (Input.IsPhysicalKeyPressed(Key.D))
 			Position -= speed * cameraDirection.Rotated(Vector3.Up, Mathf.Pi / 2.0f);
 	}
-	
-
-
-    // public override void _UnhandledInput(InputEvent @event)
-    // {
-	// 	if (@event is InputEventMouseButton eventMouseButton
-	// 		&& eventMouseButton.IsPressed()
-	// 		&& eventMouseButton.ButtonIndex == MouseButton.Left)
-	// 	{
-	// 		Camera3D camera = GetViewport().GetCamera3D();
-
-	// 		Vector3 origin = camera.ProjectRayOrigin(eventMouseButton.Position);
-	// 		Vector3 direction = camera.ProjectRayNormal(eventMouseButton.Position);
-
-	// 		Vector3 intersection = origin - (direction * origin.Y / direction.Y);
-
-	// 		move_boats(intersection);
-	// 	}
-
-	// 	else if (@event is InputEventKey eventKey)
-	// 	{
-	// 		// if (!eventKey.Echo
-	// 		// 	&& eventKey.Keycode == Key.N
-	// 		// 	&& eventKey.IsPressed())
-	// 		// 	add_new_boat();
-	// 	}
-    // }
 }

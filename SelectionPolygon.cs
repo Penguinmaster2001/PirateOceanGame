@@ -20,8 +20,6 @@ public partial class SelectionPolygon : GodotObject
         // Find a point outside
         foreach (Vector3 corner in corners)
         {
-            if (corner == null) continue;
-
             this.corners.Add(new(corner.X, corner.Z));
 
             if (point_outside.X < corner.X)
