@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://bpkexkk1we4fa"]
+[gd_scene load_steps=3 format=3 uid="uid://bpkexkk1we4fa"]
+
+[ext_resource type="Script" path="res://Hex/MultiHex/MultiHexTool.cs" id="1_wjvin"]
+[ext_resource type="Theme" uid="uid://b2n7pghrxqsdv" path="res://theme.theme" id="2_qvpye"]
 
 [node name="MultiHexTool" type="Control"]
 layout_mode = 3
@@ -7,3 +10,44 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_wjvin")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Multi Hex Tool"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -392.0
+grow_horizontal = 0
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="HexTypeOptions" type="ItemList" parent="ScrollContainer"]
+clip_contents = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("2_qvpye")
+allow_reselect = true
+max_text_lines = 3
+auto_height = true
+max_columns = 3
+same_column_width = true
+fixed_column_width = 128
+icon_mode = 0
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 162.717, 57.3102, 19.1348)
+projection = 1
+size = 500.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 0, 0)

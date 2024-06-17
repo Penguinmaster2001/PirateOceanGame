@@ -41,7 +41,7 @@ public static class HexTypes
 		Godot.Collections.Dictionary<string, Godot.Collections.Dictionary<string, Variant>> json_dict
 				= json.Data.AsGodotDictionary<string, Godot.Collections.Dictionary<string, Variant>>();
 
-		List<string> names_from_json = json_dict.Keys.ToList<string>();
+		List<string> names_from_json = json_dict.Keys.ToList();
 		List<int[]>  edges_from_json = new();
 		List<int> 	 weights_from_json = new();
 		List<string> materials_from_json = new();
@@ -93,8 +93,10 @@ public static class HexTypes
 	 */
 	private static List<int[]> generate_symmetries(int[] edge_types, out int num_symmetries)
 	{
-		List<int[]> symmetries = new();
-		symmetries.Add(edge_types);
+		List<int[]> symmetries = new()
+        {
+            edge_types
+        };
 
 		for (int i = 1; i < 6; i++)
 		{

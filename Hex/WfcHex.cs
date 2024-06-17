@@ -1,10 +1,6 @@
 using Godot;
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Serialization;
 
 public partial class WfcHex : Hex
 {
@@ -18,6 +14,7 @@ public partial class WfcHex : Hex
     public List<int> get_allowed_edge_types(int edge) => allowed_edge_types[edge % 6];
 	
 	private List<int> allowed_types = new();
+	public List<int> get_allowed_types() => allowed_types.ToList();
 
 	private int constraint = 0;
     public int get_constraint() => constraint;

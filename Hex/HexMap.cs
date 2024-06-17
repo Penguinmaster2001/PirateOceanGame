@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 
 public static class HexMap
 {
@@ -11,6 +10,7 @@ public static class HexMap
 	public static List<WfcHex> get_collapsed_hexes() => collapsed;
 
 	private static List<WfcHex> not_collapsed = new();
+	public static List<WfcHex> get_uncollapsed_hexes() => not_collapsed;
 
 	private static HexShortList shortlist = new();
 
@@ -77,19 +77,27 @@ public static class HexMap
 		for (int q = 0; q < side_length; q++)
 			for (int r = 0; r < side_length - q; r++)
 				add_hex(q, r);
-	
-	
-		collapse_coords(0, 0, "super_deep_water");
-		collapse_coords(1, 0, "super_deep_water");
-		collapse_coords(0, 1, "super_deep_water");
-
-		seed_type(20, "super_deep_water");
-		seed_type(4, "mountain");
 	}
 
 
 
-	public static void seed_type(int num, String type_name)
+	public static void generate_hexagon(int side_length)
+	{
+		size = side_length - 1;
+
+		for (int q = -size; q <= size; q++)
+		{
+			int r1 = Mathf.Max(-size, -size - q);
+			int r2 = Mathf.Min( size,  size - q);
+
+			for (int r = r1; r <= r2; r++)
+				add_hex(q, r);
+		}
+	}
+
+
+
+	public static void seed_type(int num, string type_name)
 	{
 		RandomNumberGenerator rng = new();
 
@@ -134,7 +142,7 @@ public static class HexMap
 	}
 
 
-	private static void collapse_coords(int q, int r, String type_name)
+	private static void collapse_coords(int q, int r, string type_name)
 	{
 		Hex hex = get_hex(q, r);
 
@@ -152,7 +160,7 @@ public static class HexMap
 	 * Constrain the neighbors
 	 * This is so messy it's not even funny
 	 */
-	private static void collapse_hex(WfcHex hex, int type)
+	public static void collapse_hex(WfcHex hex, int type)
 	{
 		if (hex.is_collapsed())
 			return;
@@ -359,5 +367,18 @@ public static class HexMap
 	public static bool collapsed_all_hexes()
 	{
 		return (not_collapsed.Count == 0);
+	}
+
+
+
+	public static void clear()
+	{
+		size = 0;
+		hexes = new();
+		collapsed = new();
+
+		not_collapsed = new();
+
+		shortlist = new();
 	}
 }
