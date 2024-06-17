@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using Godot;
 
 public partial class MultiHexTool : Control
@@ -19,6 +21,8 @@ public partial class MultiHexTool : Control
 
 	private WfcHex selected_hex;
 
+	private Label3D[] edge_hints = new Label3D[6];
+
 
 	public override void _Ready()
 	{
@@ -36,6 +40,15 @@ public partial class MultiHexTool : Control
 		hex_type_options = (ItemList) FindChild("HexTypeOptions");
 
 		hex_type_options.ItemSelected += on_item_selection;
+		hex_type_options.ItemActivated += on_item_activation;
+
+
+		for (int i = 0; i < 6; i++)
+		{
+			edge_hints[i] = GD.Load<PackedScene>("res://Hex/MultiHex/TypeHint.tscn").Instantiate<Label3D>();
+
+			AddChild(edge_hints[i]);
+		}
 	}
 
 
@@ -56,14 +69,7 @@ public partial class MultiHexTool : Control
 	{
 		foreach (Hex hex in HexMap.get_collapsed_hexes())
 		{
-			if (displayed_hexes.ContainsKey(hex))
-			{
-				Node3D tile_to_remove;
-
-				displayed_hexes.Remove(hex, out tile_to_remove);
-
-				tile_to_remove.QueueFree();
-			}
+			remove_hex(hex);
 
 			display_hex(hex);
 		}
@@ -90,17 +96,39 @@ public partial class MultiHexTool : Control
 
 
 
+	private void remove_hex(Hex hex)
+	{
+		if (displayed_hexes.ContainsKey(hex))
+		{
+			Node3D tile_to_remove;
+
+			displayed_hexes.Remove(hex, out tile_to_remove);
+
+			tile_to_remove.QueueFree();
+		}
+	}
+
+
+
 	private void on_hex_selection(Hex hex)
 	{
 		if (hex is WfcHex selected_hex)
 		{
-			hex_type_options.Clear();
-
 			this.selected_hex = selected_hex;
+
+			hex_type_options.Clear();
 
 			foreach (int type in selected_hex.get_allowed_types())
 			{
 				hex_type_options.AddItem(HexTypes.get_name(type));
+			}
+
+
+			List<int> types = selected_hex.get_edge_types();
+			for (int i = 0; i < 6; i++)
+			{
+				edge_hints[i].Position = selected_hex.get_world_coords() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+				edge_hints[i].Text = types[i].ToString();
 			}
 		}
 	}
@@ -108,6 +136,29 @@ public partial class MultiHexTool : Control
 
 
 	private void on_item_selection(long index)
+	{
+		// HexMap.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
+
+		// int q = selected_hex.get_q();
+		// int r = selected_hex.get_r();
+
+		// remove_hex(selected_hex);
+
+		// selected_hex = (WfcHex) HexMap.get_hex(q, r);
+
+		// display_hex(selected_hex);
+
+		int[] types = HexTypes.get_type_edges(selected_hex.get_allowed_types()[(int) index]);
+		for (int i = 0; i < 6; i++)
+		{
+			edge_hints[i].Position = selected_hex.get_world_coords() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+			edge_hints[i].Text = types[i].ToString();
+		}
+	}
+
+
+
+	private void on_item_activation(long index)
 	{
 		HexMap.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
 		update_multihex();

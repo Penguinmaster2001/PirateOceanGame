@@ -45,8 +45,9 @@ fixed_column_width = 128
 icon_mode = 0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 162.717, 57.3102, 19.1348)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 160, 200, 20)
 projection = 1
+current = true
 size = 500.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]

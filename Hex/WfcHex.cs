@@ -8,6 +8,7 @@ public partial class WfcHex : Hex
 	public bool is_collapsed() => collapsed;
 
 	private int[] edge_types = new int[] {0, 0, 0, 0, 0, 0};
+    public List<int> get_edge_types() => edge_types.ToList();
     public int get_edge_type(int edge) => edge_types[edge % 6];
 
 	private List<int>[] allowed_edge_types = new List<int>[6];

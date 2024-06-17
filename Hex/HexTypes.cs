@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,6 +7,9 @@ public static class HexTypes
 	// As more of these get added, I'm going to have to hold them into a data structure
 	private static List<int> all_types = new();
 	public  static List<int> get_all_types() => all_types;
+
+	private static List<List<int>> base_to_types = new();
+	private static List<int> types_to_base = new();
 
 	private static List<string>	type_names = new();
 	public static string get_name(int type) => type_names[type];
@@ -70,9 +72,14 @@ public static class HexTypes
 			List<int[]> symmetric_edge_arrays = generate_symmetries(edges_from_json[i], out int num_symmetries);
 			type_edges.AddRange(symmetric_edge_arrays);
 
+			base_to_types.Add(new());
+
 			for (int j = 0; j < num_symmetries; j++)
 			{
 				all_types.Add(num_types);
+				base_to_types[i].Add(num_types);
+				types_to_base.Add(i);
+
 				num_types++;
 
 				type_names.Add(names_from_json[i]);

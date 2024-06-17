@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cqt50pnqiojbd"]
+
+[node name="TypeHint" type="Label3D"]
+pixel_size = 0.1
+billboard = 1
+font_size = 128
