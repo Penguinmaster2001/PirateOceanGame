@@ -11,8 +11,6 @@ public partial class Main : Node3D
 	{
         if (Input.IsPhysicalKeyPressed(Key.Escape))
 		{
-			HexMap.clear();
-
 			GetTree().ChangeSceneToPacked(main_menu);
 		}
 	}

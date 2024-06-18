@@ -1,6 +1,5 @@
-using System;
+
 using System.Collections.Generic;
-using System.Text;
 using Godot;
 
 public partial class MultiHexTool : Control
@@ -23,6 +22,8 @@ public partial class MultiHexTool : Control
 
 	private Label3D[] edge_hints = new Label3D[6];
 
+	private MultiHex multi_hex;
+
 
 	public override void _Ready()
 	{
@@ -31,10 +32,10 @@ public partial class MultiHexTool : Control
 		foreach (string path in material_paths)
 			hex_materials.Add(GD.Load<Material>(path));
 
-		HexMap.generate_hexagon(grid_size);
+		multi_hex = new(HexContainer.MapShape.hexagon, grid_size);
 
 
-		foreach (Hex hex in HexMap.get_uncollapsed_hexes())
+		foreach (Hex hex in multi_hex.get_uncollapsed_hexes())
 			display_hex(hex);
 
 		hex_type_options = (ItemList) FindChild("HexTypeOptions");
@@ -59,7 +60,7 @@ public partial class MultiHexTool : Control
 		{
 			GetTree().ChangeSceneToPacked(main_menu);
 
-			HexMap.clear();
+			multi_hex.clear();
 		}
     }
 
@@ -67,7 +68,7 @@ public partial class MultiHexTool : Control
 
 	private void update_multihex()
 	{
-		foreach (Hex hex in HexMap.get_collapsed_hexes())
+		foreach (Hex hex in multi_hex.get_collapsed_hexes())
 		{
 			remove_hex(hex);
 
@@ -137,17 +138,6 @@ public partial class MultiHexTool : Control
 
 	private void on_item_selection(long index)
 	{
-		// HexMap.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
-
-		// int q = selected_hex.get_q();
-		// int r = selected_hex.get_r();
-
-		// remove_hex(selected_hex);
-
-		// selected_hex = (WfcHex) HexMap.get_hex(q, r);
-
-		// display_hex(selected_hex);
-
 		int[] types = HexTypes.get_type_edges(selected_hex.get_allowed_types()[(int) index]);
 		for (int i = 0; i < 6; i++)
 		{
@@ -160,7 +150,7 @@ public partial class MultiHexTool : Control
 
 	private void on_item_activation(long index)
 	{
-		HexMap.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
+		multi_hex.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
 		update_multihex();
 	}
 	
@@ -179,7 +169,7 @@ public partial class MultiHexTool : Control
 
 			Vector3 intersection = origin - (direction * origin.Y / direction.Y);
 
-			Hex selected_hex = HexMap.get_hex_at_world_coords(intersection.X, intersection.Z);
+			Hex selected_hex = multi_hex.get_hex_at_world_coords(intersection.X, intersection.Z);
 			on_hex_selection(selected_hex);
 		}
     }

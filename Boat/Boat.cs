@@ -13,6 +13,8 @@ public partial class Boat : Node3D
 	private Queue<Hex> travel_queue = new();
 	private Vector3 target_pos;
 	private bool traveling = false;
+
+	public HexMap hex_map;
 	
 
 	private Node3D boat_model;
@@ -40,7 +42,7 @@ public partial class Boat : Node3D
 		selection_circle.Visible = false;
 		target_pos = Position;
 
-		cur_hex = HexMap.get_hex_at_world_coords(target_pos.X, target_pos.Z);
+		cur_hex = hex_map.get_hex_at_world_coords(target_pos.X, target_pos.Z);
 		next_hex = cur_hex;
 		final_hex = cur_hex;
 
@@ -100,7 +102,7 @@ public partial class Boat : Node3D
 		if (!selected)
 			return;
 
-		foreach (Hex hex in HexMap.find_path(final_hex, waypoint))
+		foreach (Hex hex in hex_map.find_path(final_hex, waypoint))
 			travel_queue.Enqueue(hex);
 
 		final_hex = waypoint;

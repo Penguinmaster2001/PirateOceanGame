@@ -1,40 +1,39 @@
 using Godot;
 using System.Collections.Generic;
 
-public static class HexMap
+public class HexMap : HexContainer
 {
-	private static int size = 0;
-	private static Dictionary<(int, int), WfcHex> hexes = new();
-	private static List<WfcHex> collapsed = new();
-	public static List<WfcHex> get_collapsed_hexes() => collapsed;
+	private List<WfcHex> collapsed = new();
+	public List<WfcHex> get_collapsed_hexes() => collapsed;
 
-	private static List<WfcHex> not_collapsed = new();
-	public static List<WfcHex> get_uncollapsed_hexes() => not_collapsed;
+	private List<WfcHex> not_collapsed = new();
+	public List<WfcHex> get_uncollapsed_hexes() => not_collapsed;
 
-	private static HexShortList shortlist = new();
+	private HexShortList shortlist = new();
+
+
+
+	public HexMap(MapShape shape, int size) : base(shape, size)
+	{
+		foreach (WfcHex hex in hexes.Values)
+		{
+			not_collapsed.Add(hex);
+		}
+	}
 
 
 
 	// Add a hex to the map at coords
-	public static void add_hex(int q, int r)
+	public new void add_hex(int q, int r)
 	{
-		WfcHex new_hex = new(q, r);
+		base.add_hex(q, r);
 
-		hexes.Add((q, r), new_hex);
-
-		not_collapsed.Add(new_hex);
+		not_collapsed.Add(get_hex(q, r));
 	}
 
 
 
-	public static Hex get_hex(int q, int r)
-	{
-		return hexes.TryGetValue((q, r), out WfcHex hex) ? hex : null;
-	}
-
-
-
-	public static Hex get_hex_at_world_coords(float x, float y)
+	public Hex get_hex_at_world_coords(float x, float y)
 	{
 		Hex nearest_hex = Hex.world_coords_to_hex(x, y);
 
@@ -43,60 +42,7 @@ public static class HexMap
 
 
 
-	// Return a list of the six neighbors to the hex, null if a neighbor doesn't exist
-	private static Hex[] get_hex_neighbors(Hex hex)
-	{
-		int[][] neighbor_dirs = new int[][] {
-			new int[] { 1,  0}, // Right
-			new int[] { 1, -1}, // Up Right
-			new int[] { 0, -1}, // Up Left
-			new int[] {-1,  0}, // Left
-			new int[] {-1,  1}, // Down Left
-			new int[] { 0,  1}  // Down Right
-		};
-
-		List<Hex> neighbors = new List<Hex>();
-
-		foreach (int[] dir in neighbor_dirs)
-			neighbors.Add(get_hex(hex.get_q() + dir[0], hex.get_r() + dir[1]));
-
-		return neighbors.ToArray();
-	}
-
-
-
-	/*
-	 * Generate a map in a triangle shape
-	 * (0, 0) is the bottom point, (side_length, 0), (0, side_length) are the other corners
-	 */
-	public static void generate_triangle(int side_length)
-	{
-		size = side_length;
-
-		for (int q = 0; q < side_length; q++)
-			for (int r = 0; r < side_length - q; r++)
-				add_hex(q, r);
-	}
-
-
-
-	public static void generate_hexagon(int side_length)
-	{
-		size = side_length - 1;
-
-		for (int q = -size; q <= size; q++)
-		{
-			int r1 = Mathf.Max(-size, -size - q);
-			int r2 = Mathf.Min( size,  size - q);
-
-			for (int r = r1; r <= r2; r++)
-				add_hex(q, r);
-		}
-	}
-
-
-
-	public static void seed_type(int num, string type_name)
+	public void seed_type(int num, string type_name)
 	{
 		RandomNumberGenerator rng = new();
 
@@ -110,7 +56,7 @@ public static class HexMap
 
 
 
-	public static Hex collapse_next_hex()
+	public Hex collapse_next_hex()
 	{
 		WfcHex next_to_collapse = get_most_constrained();
 
@@ -127,7 +73,7 @@ public static class HexMap
 
 
 	// Return the most constrained tile, or a random uncollapsed one if the shortlist is empty
-	private static WfcHex get_most_constrained()
+	private WfcHex get_most_constrained()
 	{
 		RandomNumberGenerator rng = new();
 
@@ -141,7 +87,7 @@ public static class HexMap
 	}
 
 
-	private static void collapse_coords(int q, int r, string type_name)
+	private void collapse_coords(int q, int r, string type_name)
 	{
 		Hex hex = get_hex(q, r);
 
@@ -159,7 +105,7 @@ public static class HexMap
 	 * Constrain the neighbors
 	 * This is so messy it's not even funny
 	 */
-	public static void collapse_hex(WfcHex hex, int type)
+	public void collapse_hex(WfcHex hex, int type)
 	{
 		if (hex.is_collapsed())
 			return;
@@ -233,7 +179,7 @@ public static class HexMap
 	 * Tries to make as many straight lines as possible
 	 * Uses a modified version of the A* alg
 	 */
-	public static List<Hex> find_path(Hex start, Hex end)
+	public List<Hex> find_path(Hex start, Hex end)
 	{
 		start ??= get_hex(0, 0);
 
@@ -338,7 +284,7 @@ public static class HexMap
 	 * Find the hexes on the line between two hexes, and return a list of them in order
 	 * Includes end, does not include start
 	 */
-	private static List<Hex> get_hexes_on_line(Hex start, Hex end)
+	private List<Hex> get_hexes_on_line(Hex start, Hex end)
 	{
 		start ??= end;
 
@@ -363,14 +309,14 @@ public static class HexMap
 
 
 
-	public static bool collapsed_all_hexes()
+	public bool collapsed_all_hexes()
 	{
 		return (not_collapsed.Count == 0);
 	}
 
 
 
-	public static void clear()
+	public new void clear()
 	{
 		size = 0;
 		hexes = new();

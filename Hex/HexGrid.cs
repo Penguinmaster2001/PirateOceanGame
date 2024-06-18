@@ -22,6 +22,9 @@ public partial class HexGrid : Node3D
 	private List<Material> hex_materials = new();
 
 
+	public HexMap hex_map;
+
+
 
 	[Signal]
 	public delegate void HexSelectedEventHandler(Hex hex);
@@ -35,12 +38,13 @@ public partial class HexGrid : Node3D
 		foreach (string path in material_paths)
 			hex_materials.Add(GD.Load<Material>(path));
 
-		HexMap.generate_triangle(grid_size);
+
+		hex_map = new(HexContainer.MapShape.triangle, grid_size);
 
 		// HexMap.seed_type(20, "super_deep_water");
 		// HexMap.seed_type(4, "mountain");
 
-		display_map(HexMap.get_collapsed_hexes());
+		display_map(hex_map.get_collapsed_hexes());
 
 		Connect(SignalName.HexSelected,
 			new Callable(GetNode("/root/Main/FleetController"),
@@ -55,11 +59,11 @@ public partial class HexGrid : Node3D
 
 	public override void _Process(double delta)
 	{
-		if (HexMap.collapsed_all_hexes()) return;
+		if (hex_map.collapsed_all_hexes()) return;
 
 		ulong start_ms = Time.GetTicksMsec();
 		while (Time.GetTicksMsec() - start_ms < 10)
-			display_hex(HexMap.collapse_next_hex());
+			display_hex(hex_map.collapse_next_hex());
 	}
 
 
@@ -109,7 +113,7 @@ public partial class HexGrid : Node3D
 
 			Vector3 intersection = origin - (direction * origin.Y / direction.Y);
 
-			Hex selected_hex = HexMap.get_hex_at_world_coords(intersection.X, intersection.Z);
+			Hex selected_hex = hex_map.get_hex_at_world_coords(intersection.X, intersection.Z);
 			select_hex(selected_hex);
 		}
     }

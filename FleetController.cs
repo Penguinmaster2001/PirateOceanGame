@@ -25,10 +25,14 @@ public partial class FleetController : Node3D
 
 	private float movement_speed = 1000.0f;
 
+	private HexMap hex_map;
+
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		hex_map = GetNode<HexGrid>("/root/Main/HexGrid").hex_map;
+
 		boat_info = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
 
 		main_camera = GetViewport().GetCamera3D();
@@ -49,6 +53,8 @@ public partial class FleetController : Node3D
 
 		Boat new_boat = boat_scene.Instantiate<Boat>();
 		new_boat.Translate(new_boat_coords);
+
+		new_boat.hex_map = hex_map;
 
 		Connect(SignalName.AddedNewWaypoint, new Callable(new_boat, nameof(Boat.add_waypoint)));
 		Connect(SignalName.SelectedBoats, new Callable(new_boat, nameof(Boat.on_selection)));
@@ -73,7 +79,7 @@ public partial class FleetController : Node3D
 
 	private void move_boats(Vector3 pos)
 	{
-		Hex waypoint = HexMap.get_hex_at_world_coords(pos.X, pos.Z);
+		Hex waypoint = hex_map.get_hex_at_world_coords(pos.X, pos.Z);
 
 		EmitSignal(SignalName.AddedNewWaypoint, waypoint);
 	}
