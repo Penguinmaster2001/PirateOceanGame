@@ -6,7 +6,7 @@ namespace HexModule
 	public static class HexTypesCollection
 	{
 		public static List<HexType> hexTypes { get; private set; }
-		public static List<EdgeType> edgeTypes { get; private set; }
+		public static List<string> hexTypeMaterialPaths { get; private set; }
 
 		static HexTypesCollection()
 		{

@@ -19,7 +19,7 @@ namespace HexModule
 		public int S { get; private set; }
 
 		
-		protected HexType terrainType;
+		public HexType TerrainType { get; protected set; }
 
 		public const float Size = 25.0f;
 
@@ -105,7 +105,7 @@ namespace HexModule
 
 		public override string ToString()
 		{
-			return "Hex(" + Q + ", " + R + ")" + "\n" + terrainType.Name;
+			return "Hex(" + Q + ", " + R + ")" + "\n" + TerrainType.Name;
 		}
 	}
 }

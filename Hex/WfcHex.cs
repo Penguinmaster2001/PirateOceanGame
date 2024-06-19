@@ -137,7 +137,7 @@ namespace HexModule
 		public void Collapse(HexType type)
 		{
 			Collapsed = true;
-			terrainType = type;
+			TerrainType = type;
 		}
 
 

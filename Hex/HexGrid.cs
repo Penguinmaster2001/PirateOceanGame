@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using HexModule;
 
 
 
@@ -12,17 +13,13 @@ using System.Collections.Generic;
  */
 public partial class HexGrid : Node3D
 {
-	private float size_ratio = Mathf.Cos(Mathf.Pi / 6.0f);
-	private PackedScene hex_tile = GD.Load<PackedScene>("res://Hex/HexTile.tscn");
+	private float hexSideRatio = Mathf.Cos(Mathf.Pi / 6.0f);
+	private PackedScene hexTileScene = GD.Load<PackedScene>("res://Hex/HexTile.tscn");
 
 	[Export(PropertyHint.Range, "1, 500")]
-	private int grid_size;
+	private int GridSize;
 
-
-	private List<Material> hex_materials = new();
-
-
-	public HexMap hex_map;
+	public HexMap hexMap;
 
 
 
@@ -33,18 +30,12 @@ public partial class HexGrid : Node3D
 
 	public override void _Ready()
 	{
-		List<string> material_paths = HexTypes.get_type_material_paths();
-
-		foreach (string path in material_paths)
-			hex_materials.Add(GD.Load<Material>(path));
-
-
-		hex_map = new(HexContainer.MapShape.triangle, grid_size);
+		hexMap = new(HexContainer.MapShape.triangle, GridSize);
 
 		// HexMap.seed_type(20, "super_deep_water");
 		// HexMap.seed_type(4, "mountain");
 
-		display_map(hex_map.get_collapsed_hexes());
+		ShowMap(hexMap.CollapsedHexes);
 
 		Connect(SignalName.HexSelected,
 			new Callable(GetNode("/root/Main/FleetController"),
@@ -59,41 +50,41 @@ public partial class HexGrid : Node3D
 
 	public override void _Process(double delta)
 	{
-		if (hex_map.collapsed_all_hexes()) return;
+		if (hexMap.collapsed_all_hexes()) return;
 
 		ulong start_ms = Time.GetTicksMsec();
 		while (Time.GetTicksMsec() - start_ms < 10)
-			display_hex(hex_map.collapse_next_hex());
+			ShowHex(hexMap.collapse_next_hex());
 	}
 
 
 
-	private void display_map(List<WfcHex> hexes)
+	private void ShowMap(List<WfcHex> hexes)
 	{
 		foreach (Hex hex in hexes)
-			display_hex(hex);
+			ShowHex(hex);
 	}
 		
 
 
-	private void display_hex(Hex hex)
+	private void ShowHex(Hex hex)
 	{
 		if (hex == null) return;
 
-		Vector3 hex_coords = hex.get_world_coords();
+		Vector3 hex_coords = hex.GetWorldCoordinates();
 
-		Node3D display_hex = hex_tile.Instantiate<Node3D>();
+		Node3D display_hex = hexTileScene.Instantiate<Node3D>();
 
 		AddChild(display_hex);
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = hex_materials[hex.getTerrainType()];
+		hex_mesh.MaterialOverride = hex.TerrainType.Material;
 	}
 
 
 
-	private void select_hex(Hex hex)
+	private void SelectHex(Hex hex)
 	{
 		EmitSignal(SignalName.HexSelected, hex);
 	}
@@ -113,8 +104,8 @@ public partial class HexGrid : Node3D
 
 			Vector3 intersection = origin - (direction * origin.Y / direction.Y);
 
-			Hex selected_hex = hex_map.get_hex_at_world_coords(intersection.X, intersection.Z);
-			select_hex(selected_hex);
+			Hex selected_hex = hexMap.HexAtWorldCoordinates(intersection.X, intersection.Z);
+			SelectHex(selected_hex);
 		}
     }
 }

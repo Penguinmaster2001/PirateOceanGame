@@ -1,10 +1,13 @@
 using System;
 using Godot;
 
-public class MultiHex : HexMap
+namespace HexModule
 {
-	public MultiHex(MapShape shape, int size) : base(shape, size)
+	public class MultiHex : HexMap
 	{
-		
+		public MultiHex(MapShape shape, int size) : base(shape, size)
+		{
+			
+		}
 	}
 }

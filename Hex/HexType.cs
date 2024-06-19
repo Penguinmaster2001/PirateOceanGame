@@ -1,5 +1,6 @@
 
 using System;
+using Godot;
 
 namespace HexModule
 {
@@ -9,7 +10,7 @@ namespace HexModule
 		public string Name { get; protected set; }
 		public int Weight { get; protected set; }
 		public bool IsTraversable { get; protected set; }
-		public string MaterialPath { get; protected set; }
+		public Material Material { get; protected set; }
 		public EdgeType[] Edges { get; protected set; }
 
 
@@ -30,7 +31,7 @@ namespace HexModule
 			Name = name ?? "Undefined";
 			Weight = weight;
 			IsTraversable = isTraversable;
-			MaterialPath = materialPath ?? "res://TileTextures/undefined.tres";
+			Material = GD.Load<Material>(materialPath ?? "res://TileTextures/undefined.tres");
 			Edges = edges ?? new EdgeType[6] { new(), new(), new(), new(), new(), new() };
 		}
 
@@ -62,6 +63,12 @@ namespace HexModule
         public EdgeType(int type = 0)
         {
 			Type = type;
+        }
+
+
+        public override readonly string ToString()
+        {
+            return Type.ToString();
         }
     }
 }

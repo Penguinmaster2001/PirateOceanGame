@@ -1,54 +1,48 @@
 
 using System.Collections.Generic;
 using Godot;
+using HexModule;
 
 public partial class MultiHexTool : Control
 {
-	private PackedScene main_menu = GD.Load<PackedScene>("res://StartMenu.tscn");
+	private PackedScene startMenuScene = GD.Load<PackedScene>("res://StartMenu.tscn");
 
-	private float size_ratio = Mathf.Cos(Mathf.Pi / 6.0f);
+	private float hexSideRatio = Mathf.Cos(Mathf.Pi / 6.0f);
 	private PackedScene hex_tile = GD.Load<PackedScene>("res://Hex/HexTile.tscn");
     
 	private int grid_size = 5;
+	
 
+	private Dictionary<Hex, Node3D> visibleHexTiles = new();
 
-	private List<Material> hex_materials = new();
+	private ItemList hexTypeDisplay;
 
-	private Dictionary<Hex, Node3D> displayed_hexes = new();
+	private WfcHex selectedHex;
 
-	private ItemList hex_type_options;
+	private Label3D[] hexEdgeLabels = new Label3D[6];
 
-	private WfcHex selected_hex;
-
-	private Label3D[] edge_hints = new Label3D[6];
-
-	private MultiHex multi_hex;
+	private MultiHex multiHex;
 
 
 	public override void _Ready()
 	{
-		List<string> material_paths = HexTypes.get_type_material_paths();
-
-		foreach (string path in material_paths)
-			hex_materials.Add(GD.Load<Material>(path));
-
-		multi_hex = new(HexContainer.MapShape.hexagon, grid_size);
+		multiHex = new(HexContainer.MapShape.hexagon, grid_size);
 
 
-		foreach (Hex hex in multi_hex.get_uncollapsed_hexes())
+		foreach (Hex hex in multiHex.UncollapsedHexes)
 			display_hex(hex);
 
-		hex_type_options = (ItemList) FindChild("HexTypeOptions");
+		hexTypeDisplay = (ItemList) FindChild("HexTypeOptions");
 
-		hex_type_options.ItemSelected += on_item_selection;
-		hex_type_options.ItemActivated += on_item_activation;
+		hexTypeDisplay.ItemSelected += HandleItemSelection;
+		hexTypeDisplay.ItemActivated += on_item_activation;
 
 
 		for (int i = 0; i < 6; i++)
 		{
-			edge_hints[i] = GD.Load<PackedScene>("res://Hex/MultiHex/TypeHint.tscn").Instantiate<Label3D>();
+			hexEdgeLabels[i] = GD.Load<PackedScene>("res://Hex/MultiHex/TypeHint.tscn").Instantiate<Label3D>();
 
-			AddChild(edge_hints[i]);
+			AddChild(hexEdgeLabels[i]);
 		}
 	}
 
@@ -58,19 +52,19 @@ public partial class MultiHexTool : Control
     {
         if (Input.IsPhysicalKeyPressed(Key.Escape))
 		{
-			GetTree().ChangeSceneToPacked(main_menu);
+			GetTree().ChangeSceneToPacked(startMenuScene);
 
-			multi_hex.clear();
+			multiHex.clear();
 		}
     }
 
 
 
-	private void update_multihex()
+	private void UpdateMultiHex()
 	{
-		foreach (Hex hex in multi_hex.get_collapsed_hexes())
+		foreach (Hex hex in multiHex.CollapsedHexes)
 		{
-			remove_hex(hex);
+			RemoveHex(hex);
 
 			display_hex(hex);
 		}
@@ -82,67 +76,65 @@ public partial class MultiHexTool : Control
 	{
 		if (hex == null) return;
 
-		Vector3 hex_coords = hex.get_world_coords();
+		Vector3 hex_coords = hex.GetWorldCoordinates();
 
 		Node3D display_hex = hex_tile.Instantiate<Node3D>();
 
 		AddChild(display_hex);
-		displayed_hexes.Add(hex, display_hex);
+		visibleHexTiles.Add(hex, display_hex);
 
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = hex_materials[hex.getTerrainType()];
+		hex_mesh.MaterialOverride = hex.TerrainType.Material;
 	}
 
 
 
-	private void remove_hex(Hex hex)
+	private void RemoveHex(Hex hex)
 	{
-		if (displayed_hexes.ContainsKey(hex))
+		if (visibleHexTiles.ContainsKey(hex))
 		{
-			Node3D tile_to_remove;
+            visibleHexTiles.Remove(hex, out Node3D tileToRemove);
 
-			displayed_hexes.Remove(hex, out tile_to_remove);
-
-			tile_to_remove.QueueFree();
+            tileToRemove.QueueFree();
 		}
 	}
 
 
 
-	private void on_hex_selection(Hex hex)
+	private void HandleHexSelection(Hex hex)
 	{
 		if (hex is WfcHex selected_hex)
 		{
-			this.selected_hex = selected_hex;
+			this.selectedHex = selected_hex;
 
-			hex_type_options.Clear();
+			hexTypeDisplay.Clear();
 
-			foreach (int type in selected_hex.get_allowed_types())
+			foreach (HexType type in selected_hex.ValidHexTypes)
 			{
-				hex_type_options.AddItem(HexTypes.get_name(type));
+				hexTypeDisplay.AddItem(type.Name);
 			}
 
 
-			List<int> types = selected_hex.get_edge_types();
+			EdgeType[] edgeTypes = selected_hex.TerrainType.Edges;
 			for (int i = 0; i < 6; i++)
 			{
-				edge_hints[i].Position = selected_hex.get_world_coords() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
-				edge_hints[i].Text = types[i].ToString();
+				hexEdgeLabels[i].Position = selected_hex.GetWorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+				hexEdgeLabels[i].Text = edgeTypes[i].ToString();
 			}
 		}
 	}
 
 
 
-	private void on_item_selection(long index)
+	private void HandleItemSelection(long index)
 	{
-		int[] types = HexTypes.get_type_edges(selected_hex.get_allowed_types()[(int) index]);
+		EdgeType[] edgeTypes = selectedHex.ValidHexTypes[(int) index].Edges;
 		for (int i = 0; i < 6; i++)
 		{
-			edge_hints[i].Position = selected_hex.get_world_coords() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
-			edge_hints[i].Text = types[i].ToString();
+			hexEdgeLabels[i].Position = selectedHex.GetWorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+			hexEdgeLabels[i].Text = edgeTypes[i].ToString();
 		}
 	}
 
@@ -150,8 +142,8 @@ public partial class MultiHexTool : Control
 
 	private void on_item_activation(long index)
 	{
-		multi_hex.collapse_hex(selected_hex, selected_hex.get_allowed_types()[(int) index]);
-		update_multihex();
+		multiHex.collapse_hex(selectedHex, selectedHex.ValidHexTypes[(int) index]);
+		UpdateMultiHex();
 	}
 	
 
@@ -169,8 +161,8 @@ public partial class MultiHexTool : Control
 
 			Vector3 intersection = origin - (direction * origin.Y / direction.Y);
 
-			Hex selected_hex = multi_hex.get_hex_at_world_coords(intersection.X, intersection.Z);
-			on_hex_selection(selected_hex);
+			Hex selected_hex = multiHex.HexAtWorldCoordinates(intersection.X, intersection.Z);
+			HandleHexSelection(selected_hex);
 		}
     }
 }

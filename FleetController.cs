@@ -31,7 +31,7 @@ public partial class FleetController : Node3D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		hex_map = GetNode<HexGrid>("/root/Main/HexGrid").hex_map;
+		hex_map = GetNode<HexGrid>("/root/Main/HexGrid").hexMap;
 
 		boat_info = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
 
