@@ -91,7 +91,7 @@ public class HexContainer
 		List<WfcHex> neighbors = new();
 
 		foreach (Vector2I dir in neighbor_dirs)
-			neighbors.Add(get_hex(hex.get_q() + dir.X, hex.get_r() + dir.Y));
+			neighbors.Add(get_hex(hex.get_Q() + dir.X, hex.get_R() + dir.Y));
 
 		return neighbors.ToArray();
 	}

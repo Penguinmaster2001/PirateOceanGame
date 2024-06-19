@@ -92,7 +92,7 @@ public partial class MultiHexTool : Control
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = hex_materials[hex.get_terrain_type()];
+		hex_mesh.MaterialOverride = hex_materials[hex.getTerrainType()];
 	}
 
 

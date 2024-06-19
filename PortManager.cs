@@ -37,7 +37,7 @@ public partial class PortManager : Control
 
     public void on_hex_selection(Hex hex)
     {
-		if(hex == null || !HexTypes.get_name(hex.get_terrain_type()).Contains("port")) // There needs to be a better way to do this
+		if(hex == null || !HexTypes.get_name(hex.getTerrainType()).Contains("port")) // There needs to be a better way to do this
 		{
             deselect_port();
 

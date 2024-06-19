@@ -2,185 +2,145 @@ using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class WfcHex : Hex
+
+namespace Hex
 {
-	private bool collapsed = false;
-	public bool is_collapsed() => collapsed;
-
-	private int[] edge_types = new int[] {0, 0, 0, 0, 0, 0};
-    public List<int> get_edge_types() => edge_types.ToList();
-    public int get_edge_type(int edge) => edge_types[edge % 6];
-
-	private List<int>[] allowed_edge_types = new List<int>[6];
-    public List<int> get_allowed_edge_types(int edge) => allowed_edge_types[edge % 6];
-	
-	private List<int> allowed_types = new();
-	public List<int> get_allowed_types() => allowed_types.ToList();
-
-	private int constraint = 0;
-    public int get_constraint() => constraint;
-
-
-    public WfcHex(int q, int r) : base(q, r)
+	public partial class WfcHex : Hex
 	{
-		collapsed = false;
+		public bool Collapsed { get; private set; }
 
-		allowed_types = HexTypes.get_all_types().ToList();
+		private int[] edgeTypes = new int[] { 0, 0, 0, 0, 0, 0 };
+		public List<int> GetEdgeTypes() => edgeTypes.ToList();
+		public int GetEdgeType(int edge) => edgeTypes[edge % 6];
 
-		// Fill all the lists
-		for (int i = 0; i < 6; i++)
-			allowed_edge_types[i] = allowed_types.ToList();
+		private List<HexType>[] allowedEdgeTypes = new List<HexType>[6];
+		public List<HexType> GetAllowedEdgeTypes(int edge) => allowedEdgeTypes[edge % 6];
 
-		// Update all the edges after filling the lists
-		for (int i = 0; i < 6; i++)
-			update_edge_allowed_types(i);
+		public List<HexType> AllowedTypes { get; private set; }
 
-		constrain();
-	}
+		private int constraint = 0;
+		public int GetConstraint() => constraint;
 
-
-
-	public void constrain_edge(int edge, int allowed_edge_type)
-	{
-		constrain_edge(edge, new List<int> { allowed_edge_type });
-	}
-
-
-	public void constrain_edge(int edge, List<int> allowed_edge_types)
-	{
-		edge %= 6;
-
-		if (allowed_edge_types.Contains(0)) return;
-
-		foreach (int allowed_type in allowed_types.ToList())
+		public WfcHex(int q, int r) : base(q, r)
 		{
-			int type_edge = HexTypes.get_type_edges(allowed_type)[edge];
+			Collapsed = false;
 
-			if (!allowed_edge_types.Contains(type_edge))
-				allowed_types.Remove(allowed_type);
+			AllowedTypes = HexTypesCollection.hexTypes.ToList();
+
+			// Fill all the lists
+			for (int i = 0; i < 6; i++)
+				allowedEdgeTypes[i] = AllowedTypes.ToList();
+
+			// Update all the edges after filling the lists
+			for (int i = 0; i < 6; i++)
+				UpdateEdgeAllowedTypes(i);
+
+			Constrain();
 		}
 
-		update_edge_allowed_types(edge);
-
-		constrain();
-	}
-
-
-
-	private void update_edge_allowed_types(int edge)
-	{
-		edge %= 6;
-
-		List<int> edge_allowed_types = new();
-
-		foreach (int allowed_type in allowed_types)
+		public void ConstrainEdge(int edge, int allowedEdgeType)
 		{
-			int[] type_edges = HexTypes.get_type_edges(allowed_type);
-
-			if (!edge_allowed_types.Contains(type_edges[edge]))
-				edge_allowed_types.Add(type_edges[edge]);
+			ConstrainEdge(edge, new List<int> { allowedEdgeType });
 		}
 
-		allowed_edge_types[edge] = edge_allowed_types;
-
-		constrain();
-	}
-
-
-
-	private void constrain()
-	{
-        constraint = 0;
-
-		int allowed_type_weight = 0;
-		foreach (int allowed_type in allowed_types)
-			allowed_type_weight += HexTypes.get_type_weight(allowed_type);
-
-		int num_allowed_edges = 0;
-		foreach (List<int> edge in allowed_edge_types)
+		public void ConstrainEdge(int edge, List<int> allowedEdgeTypes)
 		{
-			foreach (int type in edge)
+			edge %= 6;
+
+			if (allowedEdgeTypes.Contains(0)) return;
+
+			foreach (HexType allowedType in AllowedTypes.ToList())
 			{
-				num_allowed_edges++;
+				int typeEdge = allowedType.Edges[edge];
+
+				if (!allowedEdgeTypes.Contains(typeEdge))
+					AllowedTypes.Remove(allowedType);
 			}
+
+			UpdateEdgeAllowedTypes(edge);
+
+			Constrain();
 		}
 
-		constraint = Mathf.Min(36 * allowed_type_weight / 3, num_allowed_edges * 1000);
-	}
-
-
-
-	public int get_random_allowed_type()
-	{
-		RandomNumberGenerator rng = new();
-
-		if (allowed_types.Count == 0)
-			return 0;
-
-		
-		int cum_weight = 0;
-		List<int> cum_weights = new(allowed_types.Count);
-
-		foreach (int allowed_type in allowed_types)
+		private void UpdateEdgeAllowedTypes(int edge)
 		{
-			cum_weight += HexTypes.get_type_weight(allowed_type);
-			cum_weights.Add(cum_weight);
+			edge %= 6;
+
+			List<int> edgeAllowedTypes = new();
+
+			foreach (HexType allowedType in AllowedTypes)
+			{
+				int[] typeEdges = allowedType.Edges;
+
+				if (!edgeAllowedTypes.Contains(typeEdges[edge]))
+					edgeAllowedTypes.Add(typeEdges[edge]);
+			}
+
+			allowedEdgeTypes[edge] = edgeAllowedTypes;
+
+			Constrain();
 		}
 
-		int choice = rng.RandiRange(0, cum_weight);
-
-		int index = -1;
-		foreach (int weight in cum_weights)
+		private void Constrain()
 		{
-			index++;
+			constraint = 0;
 
-			if (weight > choice)
-				break;
+			int allowedTypeWeight = 0;
+			foreach (int allowedType in AllowedTypes)
+				allowedTypeWeight += HexTypes.GetTypeWeight(allowedType);
+
+			int numAllowedEdges = 0;
+			foreach (List<int> edge in allowedEdgeTypes)
+			{
+				foreach (int type in edge)
+				{
+					numAllowedEdges++;
+				}
+			}
+
+			constraint = Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
 		}
 
-		return allowed_types[index];
+		public int GetRandomAllowedType()
+		{
+			RandomNumberGenerator rng = new();
+
+			if (AllowedTypes.Count == 0)
+				return 0;
+
+			int cumWeight = 0;
+			List<int> cumWeights = new(AllowedTypes.Count);
+
+			foreach (int allowedType in AllowedTypes)
+			{
+				cumWeight += HexTypes.GetTypeWeight(allowedType);
+				cumWeights.Add(cumWeight);
+			}
+
+			int choice = rng.RandiRange(0, cumWeight);
+
+			int index = -1;
+			foreach (int weight in cumWeights)
+			{
+				index++;
+
+				if (weight > choice)
+					break;
+			}
+
+			return AllowedTypes[index];
+		}
+
+		public void Collapse(HexType type)
+		{
+			Collapsed = true;
+			terrainType = type;
+			edgeTypes = HexTypes.GetTypeEdges(type);
+		}
+
+		public override string ToString()
+		{
+			return "Wfc" + base.ToString();
+		}
 	}
-
-
-
-	public void collapse(int type)
-	{
-		collapsed = true;
-		terrain_type = type;
-		edge_types = HexTypes.get_type_edges(type);
-	}
-
-
-
-    public override string ToString()
-    {
-        return "Wfc" + base.ToString();
-    }
-
-    /*
-
-func set_allowed_types(new_allowed_types: Array) -> void:
-	_allowed_types = new_allowed_types.duplicate()
-
-	_allowed_edge_types.clear()
-
-	for i in range(6):
-		_allowed_edge_types.append([0, -2, -1, 1, 2, 3])
-
-	_constrain()
-
-		# _update_edge_allowed_types(i)
-
-
-
-func _to_string() -> String:
-	# var allowed_type_names := [ ]
-
-	# for type: int in _allowed_types:
-	# 	allowed_type_names.append(HexMap.type_names[type])
-
-	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_types, allowed_type_names, self._collapsed, HexMap.type_names[self.terrain_type]]
-	# return "\n---\nWfcHex(_q: %d, _r: %d)\n%s\n%s\n%s\n" % [self._q, self._r, self._allowed_edge_types, self._collapsed, HexMap.type_names[self.terrain_type]]
-	return "WfcHex(q: %d, r: %d, traversable: %s)" % [self._q, self._r, HexMap.type_traversable[self.terrain_type]]
-	*/
 }

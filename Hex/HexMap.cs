@@ -37,7 +37,7 @@ public class HexMap : HexContainer
 	{
 		Hex nearest_hex = Hex.world_coords_to_hex(x, y);
 
-		return get_hex(nearest_hex.get_q(), nearest_hex.get_r());
+		return get_hex(nearest_hex.get_Q(), nearest_hex.get_R());
 	}
 
 
@@ -186,8 +186,8 @@ public class HexMap : HexContainer
 		if (end is null)
 			return new();
 
-		if (!HexTypes.is_type_traversable(start.get_terrain_type())
-			|| !HexTypes.is_type_traversable(end.get_terrain_type()))
+		if (!HexTypes.is_type_traversable(start.getTerrainType())
+			|| !HexTypes.is_type_traversable(end.getTerrainType()))
 			return new();
 
 		// Search from end to start
@@ -218,7 +218,7 @@ public class HexMap : HexContainer
 				if (next is null)
 					continue;
 				
-				if (!HexTypes.is_type_traversable(next.get_terrain_type()))
+				if (!HexTypes.is_type_traversable(next.getTerrainType()))
 				{
 					traversable_boundary[current] = true;
 					continue;
@@ -301,7 +301,7 @@ public class HexMap : HexContainer
 		for (int i = 0; i < dist + 1; i++)
 		{
 			Hex nearest_hex = Hex.lerp(start, end, (float) i / (float) dist);
-			line_hexes.Add(get_hex(nearest_hex.get_q(), nearest_hex.get_r()));
+			line_hexes.Add(get_hex(nearest_hex.get_Q(), nearest_hex.get_R()));
 		}
 
 		return line_hexes;

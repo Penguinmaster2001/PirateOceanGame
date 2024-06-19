@@ -71,7 +71,7 @@ public partial class FleetController : Node3D
 		if (hex == null)
 			return;
 
-		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.get_terrain_type()))
+		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.getTerrainType()))
 			move_boats(hex.get_world_coords());
 	}
 
