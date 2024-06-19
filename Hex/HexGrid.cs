@@ -50,7 +50,7 @@ public partial class HexGrid : Node3D
 
 	public override void _Process(double delta)
 	{
-		if (hexMap.collapsed_all_hexes()) return;
+		if (hexMap.AllHexesCollapsed()) return;
 
 		ulong start_ms = Time.GetTicksMsec();
 		while (Time.GetTicksMsec() - start_ms < 10)

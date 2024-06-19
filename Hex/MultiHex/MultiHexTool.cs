@@ -54,7 +54,7 @@ public partial class MultiHexTool : Control
 		{
 			GetTree().ChangeSceneToPacked(startMenuScene);
 
-			multiHex.clear();
+			multiHex.Clear();
 		}
     }
 

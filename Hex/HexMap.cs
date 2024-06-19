@@ -46,15 +46,13 @@ namespace HexModule
 
 
 
-		public void PopulateHexType(int num, string type_name)
+		public void PopulateHexType(int num, HexType hexType)
 		{
 			RandomNumberGenerator rng = new();
 
-			HexType type = HexTypes.get_type_from_name(type_name);
-
 			for (int i = 0; i < num; i++)
 			{
-				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], type);
+				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], hexType);
 			}
 		}
 
@@ -81,8 +79,7 @@ namespace HexModule
 		{
 			RandomNumberGenerator rng = new();
 
-			if (UncollapsedHexes.Count == 0)
-				return null;
+			if (UncollapsedHexes.Count == 0) return null;
 
 			if (shortlist.IsEmpty())
 				return UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)];
@@ -124,52 +121,47 @@ namespace HexModule
 
 			for (int i = 0; i < 6; i++)
 			{
-				if (neighbors[i] is null || neighbors[i] is not WfcHex neighbor || neighbor.Collapsed)
-					continue;
+				if (neighbors[i] is null || neighbors[i] is not WfcHex neighbor || neighbor.Collapsed) continue;
 
 				// Keep track of this for update_or_insert()
 				int previous_num = neighbor.Constraint;
 
 				// Constrain the adjacent edge on the neighbor, which is offset by 3
-				neighbor.constrain_edge(i + 3, hex.get_edge_type(i));
+				neighbor.ConstrainEdge(i + 3, hex.GetValidEdgeTypes(i));
 
 				shortlist.UpdateOrInsert(neighbor, previous_num);
 
 				// Hex past neighbor
 				Hex[] neighbor_neighbors = GetHexNeighbors(neighbor);
 
-				if (neighbor_neighbors[i] is null or not WfcHex)
-					continue;
+				if (neighbor_neighbors[i] is null or not WfcHex) continue;
 
 				WfcHex second_neighbor = neighbor_neighbors[i] as WfcHex;
 
-				if (second_neighbor.is_collapsed())
-					continue;
+				if (second_neighbor.Collapsed) continue;
 
-				previous_num = second_neighbor.get_constraint();
+				previous_num = second_neighbor.Constraint;
 
-				second_neighbor.constrain_edge(i + 3, neighbor.get_allowed_edge_types(i));
+				second_neighbor.ConstrainEdge(i + 3, neighbor.GetValidEdgeTypes(i));
 
 				shortlist.UpdateOrInsert(second_neighbor, previous_num);
 				
 				for (int j = 4; j <= 8; j++)
 					constrain_neighbor(j % 6);
 
-				void constrain_neighbor(int edge)
+				void constrain_neighbor(int edgeIndex)
 				{
 
-					if (neighbor_neighbors[edge] is null or not WfcHex)
-						return;
+					if (neighbor_neighbors[edgeIndex] is null or not WfcHex) return;
 
-					WfcHex neighbor_to_constrain = neighbor_neighbors[edge] as WfcHex;
+					WfcHex neighbor_to_constrain = neighbor_neighbors[edgeIndex] as WfcHex;
 
-					if (neighbor_to_constrain.is_collapsed())
-						return;
+					if (neighbor_to_constrain.Collapsed) return;
 					
 
-					int previous_num = neighbor_to_constrain.get_constraint();
+					int previous_num = neighbor_to_constrain.Constraint;
 
-					neighbor_to_constrain.constrain_edge(edge + 3, neighbor.get_allowed_edge_types(edge));
+					neighbor_to_constrain.ConstrainEdge(edgeIndex + 3, neighbor.GetValidEdgeTypes(edgeIndex));
 
 					shortlist.UpdateOrInsert(neighbor_to_constrain, previous_num);
 				}
@@ -182,24 +174,21 @@ namespace HexModule
 		* Tries to make as many straight lines as possible
 		* Uses a modified version of the A* alg
 		*/
-		public List<Hex> find_path(Hex start, Hex end)
+		public List<Hex> FindPathBetween(Hex start, Hex end)
 		{
 			start ??= GetHex(0, 0);
 
-			if (end is null)
-				return new();
+			if (end is null) return new();
 
-			if (!HexTypes.is_type_traversable(start.getTerrainType())
-				|| !HexTypes.is_type_traversable(end.getTerrainType()))
-				return new();
+			if (!start.TerrainType.IsTraversable || !end.TerrainType.IsTraversable) return new();
 
 			// Search from end to start
-			PriorityQueue<Hex, int> frontier = new();
+			PriorityQueue<Hex, float> frontier = new();
 			frontier.Enqueue(end, 0);
 			List<Hex> reached = new() { end };
-			Dictionary<Hex, Hex> came_from = new() {{ end, null }};
-			Dictionary<Hex, int> cost_so_far = new() {{ end, 0 }};
-			Dictionary<Hex, bool> traversable_boundary = new() {{ end, true }};
+			Dictionary<Hex, Hex> previousHex = new() {{ end, null }};
+			Dictionary<Hex, float> hexCostMap = new() {{ end, 0 }};
+			Dictionary<Hex, bool> traversableBounds = new() {{ end, true }};
 
 			int searched = 0;
 
@@ -221,27 +210,27 @@ namespace HexModule
 					if (next is null)
 						continue;
 					
-					if (!HexTypes.is_type_traversable(next.getTerrainType()))
+					if (!next.TerrainType.IsTraversable)
 					{
-						traversable_boundary[current] = true;
+						traversableBounds[current] = true;
 						continue;
 					}
 
-					int new_cost = cost_so_far[current];
+					float updatedCost = hexCostMap[current];
 					if (!reached.Contains(next))
 					{
 						reached.Add(next);
-						came_from.Add(next, current);
-						traversable_boundary.Add(next, false);
-						cost_so_far.Add(next, new_cost);
-						frontier.Enqueue(next, new_cost + (int) next.get_world_distance(start));
+						previousHex.Add(next, current);
+						traversableBounds.Add(next, false);
+						hexCostMap.Add(next, updatedCost);
+						frontier.Enqueue(next, updatedCost + Hex.GetWorldDistance(next, start));
 					}
-					else if (new_cost < cost_so_far[next])
+					else if (updatedCost < hexCostMap[next])
 					{
-						came_from[next] = current;
-						cost_so_far[next] = new_cost;
-						traversable_boundary[next] = false;
-						frontier.Enqueue(next, new_cost + (int) next.get_world_distance(start));
+						previousHex[next] = current;
+						hexCostMap[next] = updatedCost;
+						traversableBounds[next] = false;
+						frontier.Enqueue(next, updatedCost + Hex.GetWorldDistance(next, start));
 					}
 				}
 			}
@@ -255,11 +244,11 @@ namespace HexModule
 
 				while (current != end)
 				{
-					current = came_from[current];
+					current = previousHex[current];
 
-					if (traversable_boundary[current])
+					if (traversableBounds[current])
 					{
-						path.AddRange(get_hexes_on_line(line_start, current));
+						path.AddRange(FindLineBetween(line_start, current));
 						line_start = current;
 					}
 				}
@@ -287,39 +276,37 @@ namespace HexModule
 		* Find the hexes on the line between two hexes, and return a list of them in order
 		* Includes end, does not include start
 		*/
-		private List<Hex> get_hexes_on_line(Hex start, Hex end)
+		private List<Hex> FindLineBetween(Hex start, Hex end)
 		{
 			start ??= end;
 
-			if (end == null)
-				return new();
+			if (end == null) return new();
 
 			// If start == end we get a division by zero
-			if (start == end)
-				return new() {start};
+			if (start == end) return new() {start};
 
-			int dist = start.get_distance(end);
-			List<Hex> line_hexes = new();
+			int dist = Hex.GetHexDistance(start, end);
+			List<Hex> hexesOnLine = new();
 
 			for (int i = 0; i < dist + 1; i++)
 			{
-				Hex nearest_hex = Hex.lerp(start, end, (float) i / (float) dist);
-				line_hexes.Add(GetHex(nearest_hex.get_Q(), nearest_hex.get_R()));
+				Hex closestHex = Hex.Lerp(start, end, (float) i / (float) dist);
+				hexesOnLine.Add(GetHex(closestHex.Q, closestHex.R));
 			}
 
-			return line_hexes;
+			return hexesOnLine;
 		}
 
 
 
-		public bool collapsed_all_hexes()
+		public bool AllHexesCollapsed()
 		{
 			return (UncollapsedHexes.Count == 0);
 		}
 
 
 
-		public new void clear()
+		public new void Clear()
 		{
 			size = 0;
 			hexes = new();

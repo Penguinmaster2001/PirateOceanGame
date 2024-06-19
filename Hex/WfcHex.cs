@@ -10,7 +10,7 @@ namespace HexModule
 		public bool Collapsed { get; private set; }
 
 		private readonly List<EdgeType>[] validEdgeTypes = new List<EdgeType>[6];
-		public List<EdgeType> GetAllowedEdgeTypes(int edge) => validEdgeTypes[edge % 6];
+		public List<EdgeType> GetValidEdgeTypes(int edgeIndex) => validEdgeTypes[edgeIndex % 6];
 
 		public List<HexType> ValidHexTypes { get; private set; }
 
