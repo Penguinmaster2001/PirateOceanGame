@@ -54,7 +54,7 @@ public partial class HexGrid : Node3D
 
 		ulong start_ms = Time.GetTicksMsec();
 		while (Time.GetTicksMsec() - start_ms < 10)
-			ShowHex(hexMap.collapse_next_hex());
+			ShowHex(hexMap.CollapseNextHex());
 	}
 
 

@@ -41,7 +41,7 @@ namespace HexModule
 		{
 			Hex nearest_hex = Hex.WorldCoordsToHex(x, y);
 
-			return GetHex(nearest_hex.get_Q(), nearest_hex.get_R());
+			return GetHex(nearest_hex.Q, nearest_hex.R);
 		}
 
 
@@ -50,25 +50,25 @@ namespace HexModule
 		{
 			RandomNumberGenerator rng = new();
 
-			int type = HexTypes.get_type_from_name(type_name);
+			HexType type = HexTypes.get_type_from_name(type_name);
 
 			for (int i = 0; i < num; i++)
 			{
-				collapse_hex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], type);
+				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], type);
 			}
 		}
 
 
 
-		public Hex collapse_next_hex()
+		public Hex CollapseNextHex()
 		{
-			WfcHex next_to_collapse = get_most_constrained();
+			WfcHex mostConstrainedHex = GetMostConstrainedHex();
 
-			if (next_to_collapse != null)
+			if (mostConstrainedHex != null)
 			{
-				collapse_hex(next_to_collapse, next_to_collapse.get_random_allowed_type());
+				CollapseHex(mostConstrainedHex, mostConstrainedHex.GetRandomAllowedType());
 
-				return next_to_collapse;
+				return mostConstrainedHex;
 			}
 			
 			return null;
@@ -77,28 +77,28 @@ namespace HexModule
 
 
 		// Return the most constrained tile, or a random uncollapsed one if the shortlist is empty
-		private WfcHex get_most_constrained()
+		private WfcHex GetMostConstrainedHex()
 		{
 			RandomNumberGenerator rng = new();
 
 			if (UncollapsedHexes.Count == 0)
 				return null;
 
-			if (shortlist.is_empty())
+			if (shortlist.IsEmpty())
 				return UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)];
 			
-			return shortlist.get_most_constrained_random();
+			return shortlist.GetRandomMostConstrained();
 		}
 
 
-		private void collapse_coords(int q, int r, string type_name)
+
+		private void CollapseHexAtCoords(int q, int r, HexType hexType)
 		{
 			Hex hex = GetHex(q, r);
 
-			if (hex is null or not WfcHex)
-				return;
+			if (hex is null or not WfcHex) return;
 
-			collapse_hex(hex as WfcHex, HexTypes.get_type_from_name(type_name));
+			CollapseHex(hex as WfcHex, hexType);
 		}
 
 
@@ -109,13 +109,13 @@ namespace HexModule
 		* Constrain the neighbors
 		* This is so messy it's not even funny
 		*/
-		public void collapse_hex(WfcHex hex, HexType hexType)
+		public void CollapseHex(WfcHex hex, HexType hexType)
 		{
 			if (hex.Collapsed) return;
 			
 			CollapsedHexes.Add(hex);
 			UncollapsedHexes.Remove(hex);
-			shortlist.remove(hex);
+			shortlist.Remove(hex);
 
 			hex.Collapse(hexType);
 
@@ -124,16 +124,16 @@ namespace HexModule
 
 			for (int i = 0; i < 6; i++)
 			{
-				if (neighbors[i] is null || neighbors[i] is not WfcHex neighbor || neighbor.is_collapsed())
+				if (neighbors[i] is null || neighbors[i] is not WfcHex neighbor || neighbor.Collapsed)
 					continue;
 
 				// Keep track of this for update_or_insert()
-				int previous_num = neighbor.get_constraint();
+				int previous_num = neighbor.Constraint;
 
 				// Constrain the adjacent edge on the neighbor, which is offset by 3
 				neighbor.constrain_edge(i + 3, hex.get_edge_type(i));
 
-				shortlist.update_or_insert(neighbor, previous_num);
+				shortlist.UpdateOrInsert(neighbor, previous_num);
 
 				// Hex past neighbor
 				Hex[] neighbor_neighbors = GetHexNeighbors(neighbor);
@@ -150,7 +150,7 @@ namespace HexModule
 
 				second_neighbor.constrain_edge(i + 3, neighbor.get_allowed_edge_types(i));
 
-				shortlist.update_or_insert(second_neighbor, previous_num);
+				shortlist.UpdateOrInsert(second_neighbor, previous_num);
 				
 				for (int j = 4; j <= 8; j++)
 					constrain_neighbor(j % 6);
@@ -171,7 +171,7 @@ namespace HexModule
 
 					neighbor_to_constrain.constrain_edge(edge + 3, neighbor.get_allowed_edge_types(edge));
 
-					shortlist.update_or_insert(neighbor_to_constrain, previous_num);
+					shortlist.UpdateOrInsert(neighbor_to_constrain, previous_num);
 				}
 			}
 		}

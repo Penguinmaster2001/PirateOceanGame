@@ -55,15 +55,20 @@ namespace HexModule
 
 		public static EdgeType Wildcard { get; }
 
+
+
 		static EdgeType()
 		{
 			Wildcard = new();
 		}
 
+
+
         public EdgeType(int type = 0)
         {
 			Type = type;
         }
+
 
 
         public override readonly string ToString()

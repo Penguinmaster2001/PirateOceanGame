@@ -1,97 +1,98 @@
 using Godot;
 using System.Collections.Generic;
 
-public class HexShortList
+
+namespace HexModule
 {
-	private Dictionary<int, List<WfcHex>> shortlist = new();
-
-	private int num_hexes = 0;
-	public int get_num_hexes() => num_hexes;
-
-	private int least_option = int.MaxValue;
-
-
-	public void update_or_insert(WfcHex hex, int previous_num)
+	public class HexShortList
 	{
-		// The hex is already in the correct spot
-		if (hex.get_constraint() == previous_num)
-			return;
+		private readonly Dictionary<int, List<WfcHex>> hexShortlist;
 
-		// Remove from previous spot
-		if (shortlist.ContainsKey(previous_num) && shortlist[previous_num].Contains(hex))
+		public int HexCount { get; private set; }
+
+		private int minimumHexConstraint;
+
+
+
+		public HexShortList()
 		{
-			shortlist[previous_num].Remove(hex);
-			num_hexes--;
-
-			if (previous_num == least_option && shortlist[previous_num].Count == 0)
-				find_least_option();
+			HexCount = 0;
+			hexShortlist = new();
+			minimumHexConstraint = int.MaxValue;
 		}
 
-		// Insert into new spot
-		int new_num = hex.get_constraint();
-		if (!shortlist.ContainsKey(new_num))
-			shortlist.Add(new_num, new());
 
-		shortlist[new_num].Add(hex);
-		num_hexes++;
-
-		if (new_num < least_option)
-			least_option = new_num;
-	}
-
-
-
-	public void remove(WfcHex hex)
-	{
-		var num_options = hex.get_constraint();
-
-		if (shortlist.ContainsKey(num_options) && shortlist[num_options].Contains(hex))
+		public void UpdateOrInsert(WfcHex hex, int previousConstraint)
 		{
-			shortlist[num_options].Remove(hex);
-			num_hexes--;
+			// The hex is already in the correct spot
+			if (hex.Constraint == previousConstraint)
+				return;
 
-			if (num_options == least_option && shortlist[num_options].Count == 0)
-				find_least_option();
+			// Remove from previous spot
+			if (hexShortlist.ContainsKey(previousConstraint) && hexShortlist[previousConstraint].Contains(hex))
+			{
+				hexShortlist[previousConstraint].Remove(hex);
+				HexCount--;
+
+				if (previousConstraint == minimumHexConstraint && hexShortlist[previousConstraint].Count == 0)
+					GetLeastOption();
+			}
+
+			// Insert into new spot
+			int newConstraint = hex.Constraint;
+			if (!hexShortlist.ContainsKey(newConstraint))
+				hexShortlist.Add(newConstraint, new());
+
+			hexShortlist[newConstraint].Add(hex);
+			HexCount++;
+
+			if (newConstraint < minimumHexConstraint)
+				minimumHexConstraint = newConstraint;
 		}
-	}
 
 
 
-	public WfcHex get_most_constrained_random()
-	{
-		RandomNumberGenerator rng = new();
-
-		return shortlist[least_option][rng.RandiRange(0, shortlist[least_option].Count - 1)];
-	}
-
-
-
-	// Find the smallest key with a non-empty list
-	private void find_least_option()
-	{
-		least_option = int.MaxValue;
-		foreach(int key in shortlist.Keys)
+		public void Remove(WfcHex hex)
 		{
-			if (key < least_option && shortlist[key].Count > 0)
-				least_option = key;
+			var num_options = hex.Constraint;
+
+			if (hexShortlist.ContainsKey(num_options) && hexShortlist[num_options].Contains(hex))
+			{
+				hexShortlist[num_options].Remove(hex);
+				HexCount--;
+
+				if (num_options == minimumHexConstraint && hexShortlist[num_options].Count == 0)
+					GetLeastOption();
+			}
 		}
-	}
 
 
 
-	public bool is_empty()
-	{
-		return num_hexes == 0;
+		public WfcHex GetRandomMostConstrained()
+		{
+			RandomNumberGenerator rng = new();
+
+			return hexShortlist[minimumHexConstraint][rng.RandiRange(0, hexShortlist[minimumHexConstraint].Count - 1)];
+		}
+
+
+
+		// Find the smallest key with a non-empty list
+		private void GetLeastOption()
+		{
+			minimumHexConstraint = int.MaxValue;
+			foreach(int key in hexShortlist.Keys)
+			{
+				if (key < minimumHexConstraint && hexShortlist[key].Count > 0)
+					minimumHexConstraint = key;
+			}
+		}
+
+
+
+		public bool IsEmpty()
+		{
+			return HexCount == 0;
+		}
 	}
 }
-
-/*
-func _to_string() -> String:
-	var string := "Number of hexes: " + String.num_int64(num_hexes) + "\n"
-
-	for option: int in current_options:
-		string += String.num_int64(option) + ": " + shortlist[option].to_string() + "\n"
-
-	return string
-
-*/

@@ -142,7 +142,7 @@ public partial class MultiHexTool : Control
 
 	private void on_item_activation(long index)
 	{
-		multiHex.collapse_hex(selectedHex, selectedHex.ValidHexTypes[(int) index]);
+		multiHex.CollapseHex(selectedHex, selectedHex.ValidHexTypes[(int) index]);
 		UpdateMultiHex();
 	}
 	
