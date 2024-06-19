@@ -3,58 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Hex
+namespace HexModule
 {
 	public partial class WfcHex : Hex
 	{
 		public bool Collapsed { get; private set; }
 
-		private int[] edgeTypes = new int[] { 0, 0, 0, 0, 0, 0 };
-		public List<int> GetEdgeTypes() => edgeTypes.ToList();
-		public int GetEdgeType(int edge) => edgeTypes[edge % 6];
+		private readonly List<EdgeType>[] validEdgeTypes = new List<EdgeType>[6];
+		public List<EdgeType> GetAllowedEdgeTypes(int edge) => validEdgeTypes[edge % 6];
 
-		private List<HexType>[] allowedEdgeTypes = new List<HexType>[6];
-		public List<HexType> GetAllowedEdgeTypes(int edge) => allowedEdgeTypes[edge % 6];
+		public List<HexType> ValidHexTypes { get; private set; }
 
-		public List<HexType> AllowedTypes { get; private set; }
+		public int Constraint { get; private set; }
 
-		private int constraint = 0;
-		public int GetConstraint() => constraint;
+
 
 		public WfcHex(int q, int r) : base(q, r)
 		{
 			Collapsed = false;
 
-			AllowedTypes = HexTypesCollection.hexTypes.ToList();
+			ValidHexTypes = HexTypesCollection.hexTypes.ToList();
 
 			// Fill all the lists
-			for (int i = 0; i < 6; i++)
-				allowedEdgeTypes[i] = AllowedTypes.ToList();
+			for (int i = 0; i < numEdges; i++)
+				validEdgeTypes[i] = HexTypesCollection.GetCommonEdgeTypes(ValidHexTypes);
 
 			// Update all the edges after filling the lists
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < numEdges; i++)
 				UpdateEdgeAllowedTypes(i);
 
 			Constrain();
 		}
 
-		public void ConstrainEdge(int edge, int allowedEdgeType)
+
+
+		public void ConstrainEdge(int edge, EdgeType allowedEdgeType)
 		{
-			ConstrainEdge(edge, new List<int> { allowedEdgeType });
+			ConstrainEdge(edge, new List<EdgeType> { allowedEdgeType });
 		}
 
-		public void ConstrainEdge(int edge, List<int> allowedEdgeTypes)
+
+
+		public void ConstrainEdge(int edge, List<EdgeType> allowedEdgeTypes)
 		{
-			edge %= 6;
+			edge %= numEdges;
 
-			if (allowedEdgeTypes.Contains(0)) return;
+			if (allowedEdgeTypes.Contains(EdgeType.Wildcard)) return;
 
-			foreach (HexType allowedType in AllowedTypes.ToList())
+			foreach (HexType allowedType in ValidHexTypes.ToList())
 			{
-				int typeEdge = allowedType.Edges[edge];
+				EdgeType typeEdge = allowedType.Edges[edge];
 
 				if (!allowedEdgeTypes.Contains(typeEdge))
-					AllowedTypes.Remove(allowedType);
+					ValidHexTypes.Remove(allowedType);
 			}
 
 			UpdateEdgeAllowedTypes(edge);
@@ -62,58 +63,58 @@ namespace Hex
 			Constrain();
 		}
 
+
+
 		private void UpdateEdgeAllowedTypes(int edge)
 		{
-			edge %= 6;
+			edge %= numEdges;
 
-			List<int> edgeAllowedTypes = new();
+			List<EdgeType> edgeAllowedTypes = new();
 
-			foreach (HexType allowedType in AllowedTypes)
+			foreach (HexType validHexType in ValidHexTypes)
 			{
-				int[] typeEdges = allowedType.Edges;
+				EdgeType[] typeEdges = validHexType.Edges;
 
 				if (!edgeAllowedTypes.Contains(typeEdges[edge]))
 					edgeAllowedTypes.Add(typeEdges[edge]);
 			}
 
-			allowedEdgeTypes[edge] = edgeAllowedTypes;
+			validEdgeTypes[edge] = edgeAllowedTypes;
 
 			Constrain();
 		}
 
+
+
 		private void Constrain()
 		{
-			constraint = 0;
+			Constraint = 0;
 
 			int allowedTypeWeight = 0;
-			foreach (int allowedType in AllowedTypes)
-				allowedTypeWeight += HexTypes.GetTypeWeight(allowedType);
+			foreach (HexType allowedType in ValidHexTypes)
+				allowedTypeWeight += allowedType.Weight;
 
 			int numAllowedEdges = 0;
-			foreach (List<int> edge in allowedEdgeTypes)
-			{
-				foreach (int type in edge)
-				{
-					numAllowedEdges++;
-				}
-			}
+			foreach (List<EdgeType> validEdgeType in validEdgeTypes)
+				numAllowedEdges += validEdgeType.Count;
 
-			constraint = Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
+			Constraint = Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
 		}
 
-		public int GetRandomAllowedType()
+
+
+		public HexType GetRandomAllowedType()
 		{
 			RandomNumberGenerator rng = new();
 
-			if (AllowedTypes.Count == 0)
-				return 0;
+			if (ValidHexTypes.Count == 0) return new();
 
 			int cumWeight = 0;
-			List<int> cumWeights = new(AllowedTypes.Count);
+			List<int> cumWeights = new(ValidHexTypes.Count);
 
-			foreach (int allowedType in AllowedTypes)
+			foreach (HexType allowedType in ValidHexTypes)
 			{
-				cumWeight += HexTypes.GetTypeWeight(allowedType);
+				cumWeight += allowedType.Weight;
 				cumWeights.Add(cumWeight);
 			}
 
@@ -128,15 +129,18 @@ namespace Hex
 					break;
 			}
 
-			return AllowedTypes[index];
+			return ValidHexTypes[index];
 		}
+
+
 
 		public void Collapse(HexType type)
 		{
 			Collapsed = true;
 			terrainType = type;
-			edgeTypes = HexTypes.GetTypeEdges(type);
 		}
+
+
 
 		public override string ToString()
 		{

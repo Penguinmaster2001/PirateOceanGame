@@ -1,7 +1,7 @@
 
 using System;
 
-namespace Hex
+namespace HexModule
 {
 	[Serializable]
 	public class HexType
@@ -10,18 +10,28 @@ namespace Hex
 		public int Weight { get; protected set; }
 		public bool IsTraversable { get; protected set; }
 		public string MaterialPath { get; protected set; }
-		public int[] Edges { get; protected set; }
+		public EdgeType[] Edges { get; protected set; }
+
+
+		public static HexType Wildcard { get; }
+
+
+
+		static HexType()
+		{
+			Wildcard = new();
+		}
 
 
 
 		public HexType(string name = null, int weight = 0, bool isTraversable = false,
-			string materialPath = null, int[] edges = null)
+			string materialPath = null, EdgeType[] edges = null)
 		{
 			Name = name ?? "Undefined";
 			Weight = weight;
 			IsTraversable = isTraversable;
 			MaterialPath = materialPath ?? "res://TileTextures/undefined.tres";
-			Edges = edges ?? new int[6] { 0, 0, 0, 0, 0, 0 };
+			Edges = edges ?? new EdgeType[6] { new(), new(), new(), new(), new(), new() };
 		}
 
 
@@ -30,6 +40,28 @@ namespace Hex
         {
             return Name;
         }
-    
 	}
+
+
+
+	/*
+	 * This is really just meant to act as a type alias for int
+	 * I may add more in the future, however
+	 */
+	public struct EdgeType
+	{
+		public int Type { get; set; }
+
+		public static EdgeType Wildcard { get; }
+
+		static EdgeType()
+		{
+			Wildcard = new();
+		}
+
+        public EdgeType(int type = 0)
+        {
+			Type = type;
+        }
+    }
 }

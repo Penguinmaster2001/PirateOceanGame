@@ -1,7 +1,7 @@
 using Godot;
 
 
-namespace Hex
+namespace HexModule
 {
 	/* 
 	* 
@@ -9,6 +9,9 @@ namespace Hex
 	*/
 	public partial class Hex : GodotObject // To allow signals to carry Hexes
 	{
+		public const int numEdges = 6;
+
+
 		public int Q { get; private set; }
 
 		public int R { get; private set; }

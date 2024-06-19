@@ -8,3 +8,5 @@
 3. I'm completely changing the hex type system, I need to rewrite pretty much everything because of that.
 
 4. Everything is a WfcHex, the base class for Hex doesn't really have a use. But I want the base hex to be what's actually used everywhere. I need to figure out where to use the WfcHexes so they don't replace base hexes.
+
+5. Edge types need to be better defined.

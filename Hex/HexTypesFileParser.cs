@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.Json;
 
 
-namespace Hex
+namespace HexModule
 {
 	public static class HexTypesFileParser
 	{
