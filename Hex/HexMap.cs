@@ -207,8 +207,7 @@ namespace HexModule
 				
 				foreach (Hex next in GetHexNeighbors(current))
 				{
-					if (next is null)
-						continue;
+					if (next is null) continue;
 					
 					if (!next.TerrainType.IsTraversable)
 					{

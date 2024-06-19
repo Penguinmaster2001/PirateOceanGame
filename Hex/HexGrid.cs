@@ -39,11 +39,11 @@ public partial class HexGrid : Node3D
 
 		Connect(SignalName.HexSelected,
 			new Callable(GetNode("/root/Main/FleetController"),
-			nameof(FleetController.on_hex_selection)));
+			nameof(FleetController.HandleHexSelection)));
 
 		Connect(SignalName.HexSelected,
 			new Callable(GetNode("/root/Main/GameUI/PortManager"),
-			nameof(PortManager.on_hex_selection)));
+			nameof(PortManager.HandleHexSelection)));
 	}
 
 

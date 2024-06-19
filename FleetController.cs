@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using HexModule;
 using System.Collections.Generic;
 
 public partial class FleetController : Node3D
@@ -14,108 +15,107 @@ public partial class FleetController : Node3D
 	public delegate void SelectionClearedEventHandler();
 
 
-	private PackedScene boat_scene = GD.Load<PackedScene>("res://Boat/boat.tscn");
+	private PackedScene boatScene = GD.Load<PackedScene>("res://Boat/boat.tscn");
 
-	private List<Boat> boats = new();
-	private List<Boat> selected_boats = new();
+	private readonly List<Boat> boats = new();
+	private readonly List<Boat> selectedBoats = new();
 
-	private Label boat_info;
+	private Label lblBoatInfo;
 
-	private Camera3D main_camera;
+	private Camera3D mainCamera;
 
-	private float movement_speed = 1000.0f;
+	private float movementSpeed = 1000.0f;
 
-	private HexMap hex_map;
+	private HexMap hexMap;
 
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		hex_map = GetNode<HexGrid>("/root/Main/HexGrid").hexMap;
+		hexMap = GetNode<HexGrid>("/root/Main/HexGrid").hexMap;
 
-		boat_info = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
+		lblBoatInfo = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
 
-		main_camera = GetViewport().GetCamera3D();
+		mainCamera = GetViewport().GetCamera3D();
 	}
 
 
 
 	public override void _Process(double delta)
 	{
-		handle_input((float) delta);
+		HandleInput((float) delta);
 	}
 
 
 
-	public void add_new_boat(Vector3 new_boat_coords)
+	public void SpawnNewBoat(Vector3 boatSpawnCoordinates)
 	{
-		new_boat_coords.Y = 0;
+		boatSpawnCoordinates.Y = 0;
 
-		Boat new_boat = boat_scene.Instantiate<Boat>();
-		new_boat.Translate(new_boat_coords);
+		Boat spawnedBoat = boatScene.Instantiate<Boat>();
+		spawnedBoat.Translate(boatSpawnCoordinates);
 
-		new_boat.hex_map = hex_map;
+		spawnedBoat.hex_map = hexMap;
 
-		Connect(SignalName.AddedNewWaypoint, new Callable(new_boat, nameof(Boat.add_waypoint)));
-		Connect(SignalName.SelectedBoats, new Callable(new_boat, nameof(Boat.on_selection)));
-		Connect(SignalName.SelectionCleared, new Callable(new_boat, nameof(Boat.on_selection_cleared)));
+		Connect(SignalName.AddedNewWaypoint, new Callable(spawnedBoat, nameof(Boat.add_waypoint)));
+		Connect(SignalName.SelectedBoats, new Callable(spawnedBoat, nameof(Boat.on_selection)));
+		Connect(SignalName.SelectionCleared, new Callable(spawnedBoat, nameof(Boat.on_selection_cleared)));
 
-		GetParent().AddChild(new_boat);
-		boats.Add(new_boat);
+		GetParent().AddChild(spawnedBoat);
+		boats.Add(spawnedBoat);
 	}
 
 
 
-	public void on_hex_selection(Hex hex)
+	public void HandleHexSelection(Hex hex)
 	{
-		if (hex == null)
-			return;
+		if (hex == null) return;
 
-		if (selected_boats.Count > 0 && HexTypes.is_type_traversable(hex.getTerrainType()))
-			move_boats(hex.get_world_coords());
+		if (selectedBoats.Count > 0 && hex.TerrainType.IsTraversable)
+			AddNewBoatWaypoint(hex.GetWorldCoordinates());
 	}
 
 
 
-	private void move_boats(Vector3 pos)
+	private void AddNewBoatWaypoint(Vector3 pos)
 	{
-		Hex waypoint = hex_map.get_hex_at_world_coords(pos.X, pos.Z);
+		Hex waypoint = hexMap.HexAtWorldCoordinates(pos.X, pos.Z);
 
 		EmitSignal(SignalName.AddedNewWaypoint, waypoint);
 	}
 
 
 
-	public void select_boats(SelectionPolygon selection_quad)
+	public void UpdateSelectedBoats(SelectionPolygon selection_quad)
 	{
-		selected_boats.Clear();
+		selectedBoats.Clear();
 		EmitSignal(SignalName.SelectionCleared);
 
 		foreach (Boat boat in boats)
 		{
 			if (selection_quad.has_point(boat.Position))
 			{
-				selected_boats.Add(boat);
+				selectedBoats.Add(boat);
 				boat.Call(nameof(Boat.on_selection));
 			}
 		}
 
-		if (selected_boats.Count <= 0)
-			boat_info.Text = "No boats selected";
-		else if (selected_boats.Count == 1)
-			boat_info.Text = selected_boats[0].ToString();
+		if (selectedBoats.Count <= 0)
+			lblBoatInfo.Text = "No boats selected";
+		else if (selectedBoats.Count == 1)
+			lblBoatInfo.Text = selectedBoats[0].ToString();
 		else
-			boat_info.Text = selected_boats.Count + " Boats Selected";
+			lblBoatInfo.Text = selectedBoats.Count + " Boats Selected";
 	}
 
 
-	private void handle_input(float delta)
+	private void HandleInput(float delta)
 	{
-		Vector3 cameraDirection = -main_camera.GlobalBasis.Z;
+		Vector3 cameraDirection = -mainCamera.GlobalBasis.Z;
 		cameraDirection.Y = 0;
 		cameraDirection = cameraDirection.Normalized();
 
-		float speed = movement_speed * delta * Mathf.Clamp(main_camera.Position.Y / 1000.0f, 0.25f, 3.0f);
+		float speed = movementSpeed * delta * Mathf.Clamp(mainCamera.Position.Y / 1000.0f, 0.25f, 3.0f);
 		
 		if (Input.IsPhysicalKeyPressed(Key.W))
 			Position += speed * cameraDirection;

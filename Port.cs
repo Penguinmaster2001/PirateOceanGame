@@ -1,5 +1,6 @@
 
 using Godot;
+using HexModule;
 
 
 
@@ -11,23 +12,20 @@ public class Port
 {
     private RandomNumberGenerator rng = new();
 
-    private int name = 0;
+    public Vector3 NewBoatSpawnLocation { get; private set; }
 
-    private Hex hex;
+    private readonly int name = 0;
+
+    public Hex PortHex { get; private set; }
 
 
     public Port(Hex hex)
     {
         name = rng.RandiRange(1000, 9999);
 
-        this.hex = hex;
-    }
+        PortHex = hex;
 
-
-
-    public Vector3 get_spawn_location()
-    {
-        return hex.get_world_coords();
+        NewBoatSpawnLocation = hex.GetWorldCoordinates();
     }
 
 

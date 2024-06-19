@@ -29,7 +29,7 @@ public partial class SelectionBox : Control
         box = GetNode<NinePatchRect>("SelectionRect");
         box.Visible = false;
 
-        Connect("SelectionArea", new Callable(GetNode("/root/Main/FleetController"), nameof(FleetController.select_boats)));
+        Connect("SelectionArea", new Callable(GetNode("/root/Main/FleetController"), nameof(FleetController.UpdateSelectedBoats)));
 
         for (int i = 0; i < 4; i++)
             screen_corners[i] = Vector2.Zero;

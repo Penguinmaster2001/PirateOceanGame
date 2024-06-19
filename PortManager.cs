@@ -1,4 +1,5 @@
 using Godot;
+using HexModule;
 using System.Collections.Generic;
 
 
@@ -10,13 +11,13 @@ using System.Collections.Generic;
  */
 public partial class PortManager : Control
 {
-    private Dictionary<Hex, Port> ports = new();
+    private readonly Dictionary<Hex, Port> ports = new();
 
     private Control game_ui;
 	private PackedScene port_ui_scene = GD.Load<PackedScene>("res://PortUI.tscn");
-	private Control current_port_ui = null;
+	private Control selectedPortUI = null;
 
-    private Port selected_port = null;
+    private Port selectedPort = null;
 
 
     [Signal]
@@ -30,72 +31,71 @@ public partial class PortManager : Control
 
 		Connect(SignalName.SpawnNewBoat,
 			new Callable(GetNode("/root/Main/FleetController"),
-			nameof(FleetController.add_new_boat)));
+			nameof(FleetController.SpawnNewBoat)));
     }
 
 
 
-    public void on_hex_selection(Hex hex)
+    public void HandleHexSelection(Hex hex)
     {
-		if(hex == null || !HexTypes.get_name(hex.getTerrainType()).Contains("port")) // There needs to be a better way to do this
+		if(hex == null || !hex.TerrainType.Name.Contains("port")) // There needs to be a better way to do this
 		{
-            deselect_port();
-
+            ClearSelectedPort();
             return;
 		}
 
         if (!ports.ContainsKey(hex))
-            add_new_port(hex);
+            RegisterNewPort(hex);
 
-        if (ports[hex] == selected_port) return;
+        if (ports[hex] == selectedPort) return;
 
-        deselect_port();
-        select_port(ports[hex]);
+        ClearSelectedPort();
+        SetSelectedPort(ports[hex]);
     }
 
 
 
-    private void select_port(Port port)
+    private void SetSelectedPort(Port port)
     {
-        selected_port = port;
+        selectedPort = port;
 
-        current_port_ui = port_ui_scene.Instantiate<Control>();
+        selectedPortUI = port_ui_scene.Instantiate<Control>();
 
-        AddChild(current_port_ui);
+        AddChild(selectedPortUI);
 
-        Button new_boat_button = (Button) current_port_ui.FindChild("NewBoatButton");
-        new_boat_button.Pressed += on_new_boat_button_pressed;
+        Button btnNewBoat = (Button) selectedPortUI.FindChild("NewBoatButton");
+        btnNewBoat.Pressed += HandleNewBoatButtonPress;
 
-        Label port_name_label = (Label) current_port_ui.FindChild("PortName");
-        port_name_label.Text = selected_port.ToString();
+        Label lblPortName = (Label) selectedPortUI.FindChild("PortName");
+        lblPortName.Text = selectedPort.ToString();
     }
 
 
 
-    private void deselect_port()
+    private void ClearSelectedPort()
     {
-        selected_port = null;
+        selectedPort = null;
 
-        if (current_port_ui != null && current_port_ui.IsInsideTree())
+        if (selectedPortUI != null && selectedPortUI.IsInsideTree())
         {
-            current_port_ui.QueueFree();
+            selectedPortUI.QueueFree();
 
             // We will treat the reference as invalid as this point
-            current_port_ui = null;
+            selectedPortUI = null;
         }
     }
 
 
 
-    private void add_new_port(Hex hex)
+    private void RegisterNewPort(Hex hex)
     {
         ports.Add(hex, new(hex));
     }
 
 
 
-    public void on_new_boat_button_pressed()
+    public void HandleNewBoatButtonPress()
     {
-        EmitSignal(SignalName.SpawnNewBoat, selected_port.get_spawn_location());
+        EmitSignal(SignalName.SpawnNewBoat, selectedPort.NewBoatSpawnLocation);
     }
 }
