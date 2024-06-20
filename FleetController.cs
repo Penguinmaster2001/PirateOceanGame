@@ -29,6 +29,7 @@ public partial class FleetController : Node3D
 	private HexMap hexMap;
 
 
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -71,8 +72,8 @@ public partial class FleetController : Node3D
 	{
 		if (hex == null) return;
 
-		if (selectedBoats.Count > 0 && hex.TerrainType.IsTraversable)
-			AddNewBoatWaypoint(hex.GetWorldCoordinates());
+		if (selectedBoats.Count > 0 && hex.TerrainType.Traversable)
+			AddNewBoatWaypoint(hex.WorldCoordinates());
 	}
 
 
@@ -107,6 +108,7 @@ public partial class FleetController : Node3D
 		else
 			lblBoatInfo.Text = selectedBoats.Count + " Boats Selected";
 	}
+
 
 
 	private void HandleInput(float delta)

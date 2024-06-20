@@ -8,7 +8,7 @@ namespace HexModule
 	{
 		private readonly Dictionary<int, List<WfcHex>> hexShortlist;
 
-		public int HexCount { get; private set; }
+		public int Count { get; private set; }
 
 		private int minimumHexConstraint;
 
@@ -16,7 +16,7 @@ namespace HexModule
 
 		public HexShortList()
 		{
-			HexCount = 0;
+			Count = 0;
 			hexShortlist = new();
 			minimumHexConstraint = int.MaxValue;
 		}
@@ -25,14 +25,16 @@ namespace HexModule
 		public void UpdateOrInsert(WfcHex hex, int previousConstraint)
 		{
 			// The hex is already in the correct spot
-			if (hex.Constraint == previousConstraint)
-				return;
+			if (hex.Constraint == previousConstraint
+				&& hexShortlist.ContainsKey(hex.Constraint)
+				&& hexShortlist[hex.Constraint].Contains(hex))
+					return;
 
 			// Remove from previous spot
 			if (hexShortlist.ContainsKey(previousConstraint) && hexShortlist[previousConstraint].Contains(hex))
 			{
 				hexShortlist[previousConstraint].Remove(hex);
-				HexCount--;
+				Count--;
 
 				if (previousConstraint == minimumHexConstraint && hexShortlist[previousConstraint].Count == 0)
 					GetLeastOption();
@@ -44,7 +46,7 @@ namespace HexModule
 				hexShortlist.Add(newConstraint, new());
 
 			hexShortlist[newConstraint].Add(hex);
-			HexCount++;
+			Count++;
 
 			if (newConstraint < minimumHexConstraint)
 				minimumHexConstraint = newConstraint;
@@ -59,7 +61,7 @@ namespace HexModule
 			if (hexShortlist.ContainsKey(num_options) && hexShortlist[num_options].Contains(hex))
 			{
 				hexShortlist[num_options].Remove(hex);
-				HexCount--;
+				Count--;
 
 				if (num_options == minimumHexConstraint && hexShortlist[num_options].Count == 0)
 					GetLeastOption();
@@ -92,7 +94,7 @@ namespace HexModule
 
 		public bool IsEmpty()
 		{
-			return HexCount == 0;
+			return Count == 0;
 		}
 	}
 }

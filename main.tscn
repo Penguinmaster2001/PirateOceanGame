@@ -14,7 +14,7 @@ script = ExtResource("1_m424w")
 
 [node name="HexGrid" type="Node3D" parent="."]
 script = ExtResource("1_uydds")
-grid_size = 200
+GridSize = 200
 
 [node name="FleetController" type="Node3D" parent="."]
 script = ExtResource("1_l2pe5")

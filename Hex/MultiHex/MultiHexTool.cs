@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using HexModule;
 
@@ -13,7 +14,7 @@ public partial class MultiHexTool : Control
 	private int grid_size = 5;
 	
 
-	private Dictionary<Hex, Node3D> visibleHexTiles = new();
+	private readonly Dictionary<Hex, Node3D> visibleHexTiles = new();
 
 	private ItemList hexTypeDisplay;
 
@@ -21,21 +22,21 @@ public partial class MultiHexTool : Control
 
 	private Label3D[] hexEdgeLabels = new Label3D[6];
 
-	private MultiHex multiHex;
+	private HexMap hexMap;
 
 
 	public override void _Ready()
 	{
-		multiHex = new(HexContainer.MapShape.hexagon, grid_size);
+		hexMap = new(HexContainer.MapShape.hexagon, grid_size);
 
 
-		foreach (Hex hex in multiHex.UncollapsedHexes)
-			display_hex(hex);
+		foreach (Hex hex in hexMap.UncollapsedHexes)
+			ShowHex(hex);
 
 		hexTypeDisplay = (ItemList) FindChild("HexTypeOptions");
 
 		hexTypeDisplay.ItemSelected += HandleItemSelection;
-		hexTypeDisplay.ItemActivated += on_item_activation;
+		hexTypeDisplay.ItemActivated += HandleItemActivation;
 
 
 		for (int i = 0; i < 6; i++)
@@ -54,7 +55,7 @@ public partial class MultiHexTool : Control
 		{
 			GetTree().ChangeSceneToPacked(startMenuScene);
 
-			multiHex.Clear();
+			hexMap.Clear();
 		}
     }
 
@@ -62,21 +63,21 @@ public partial class MultiHexTool : Control
 
 	private void UpdateMultiHex()
 	{
-		foreach (Hex hex in multiHex.CollapsedHexes)
+		foreach (Hex hex in hexMap.CollapsedHexes)
 		{
 			RemoveHex(hex);
 
-			display_hex(hex);
+			ShowHex(hex);
 		}
 	}
 		
 
 
-	private void display_hex(Hex hex)
+	private void ShowHex(Hex hex)
 	{
 		if (hex == null) return;
 
-		Vector3 hex_coords = hex.GetWorldCoordinates();
+		Vector3 hex_coords = hex.WorldCoordinates();
 
 		Node3D display_hex = hex_tile.Instantiate<Node3D>();
 
@@ -86,7 +87,7 @@ public partial class MultiHexTool : Control
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = hex.TerrainType.Material;
+		hex_mesh.MaterialOverride = GD.Load<Material>(hex.TerrainType.MaterialPath);
 	}
 
 
@@ -105,22 +106,22 @@ public partial class MultiHexTool : Control
 
 	private void HandleHexSelection(Hex hex)
 	{
-		if (hex is WfcHex selected_hex)
+		if (hex is WfcHex newSelectedHex)
 		{
-			this.selectedHex = selected_hex;
+			selectedHex = newSelectedHex;
 
 			hexTypeDisplay.Clear();
 
-			foreach (HexType type in selected_hex.ValidHexTypes)
+			foreach (HexType type in newSelectedHex.ValidHexTypes)
 			{
 				hexTypeDisplay.AddItem(type.Name);
 			}
 
 
-			EdgeType[] edgeTypes = selected_hex.TerrainType.Edges;
+			EdgeType[] edgeTypes = newSelectedHex.TerrainType.EdgeTypes;
 			for (int i = 0; i < 6; i++)
 			{
-				hexEdgeLabels[i].Position = selected_hex.GetWorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+				hexEdgeLabels[i].Position = newSelectedHex.WorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
 				hexEdgeLabels[i].Text = edgeTypes[i].ToString();
 			}
 		}
@@ -130,19 +131,19 @@ public partial class MultiHexTool : Control
 
 	private void HandleItemSelection(long index)
 	{
-		EdgeType[] edgeTypes = selectedHex.ValidHexTypes[(int) index].Edges;
+		EdgeType[] edgeTypes = selectedHex.ValidHexTypes.ToArray()[(int) index].EdgeTypes;
 		for (int i = 0; i < 6; i++)
 		{
-			hexEdgeLabels[i].Position = selectedHex.GetWorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
+			hexEdgeLabels[i].Position = selectedHex.WorldCoordinates() + (25.0f * new Vector3(Mathf.Cos(i * Mathf.Pi / 3.0f), 1.0f, Mathf.Sin(i * Mathf.Pi / 3.0f)));
 			hexEdgeLabels[i].Text = edgeTypes[i].ToString();
 		}
 	}
 
 
 
-	private void on_item_activation(long index)
+	private void HandleItemActivation(long index)
 	{
-		multiHex.CollapseHex(selectedHex, selectedHex.ValidHexTypes[(int) index]);
+		hexMap.CollapseHex(selectedHex, selectedHex.ValidHexTypes.ToArray()[(int) index]);
 		UpdateMultiHex();
 	}
 	
@@ -161,7 +162,7 @@ public partial class MultiHexTool : Control
 
 			Vector3 intersection = origin - (direction * origin.Y / direction.Y);
 
-			Hex selected_hex = multiHex.HexAtWorldCoordinates(intersection.X, intersection.Z);
+			Hex selected_hex = hexMap.HexAtWorldCoordinates(intersection.X, intersection.Z);
 			HandleHexSelection(selected_hex);
 		}
     }

@@ -12,6 +12,8 @@ namespace HexModule
 
 		private HexShortList shortlist = new();
 
+		private readonly RandomNumberGenerator rng = new();
+
 
 
 		public HexMap(MapShape shape, int size) : base(shape, size)
@@ -20,9 +22,7 @@ namespace HexModule
 			UncollapsedHexes = new();
 
 			foreach (WfcHex hex in hexes.Values)
-			{
 				UncollapsedHexes.Add(hex);
-			}
 		}
 
 
@@ -48,8 +48,6 @@ namespace HexModule
 
 		public void PopulateHexType(int num, HexType hexType)
 		{
-			RandomNumberGenerator rng = new();
-
 			for (int i = 0; i < num; i++)
 			{
 				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], hexType);
@@ -77,12 +75,11 @@ namespace HexModule
 		// Return the most constrained tile, or a random uncollapsed one if the shortlist is empty
 		private WfcHex GetMostConstrainedHex()
 		{
-			RandomNumberGenerator rng = new();
-
 			if (UncollapsedHexes.Count == 0) return null;
 
-			if (shortlist.IsEmpty())
-				return UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)];
+			// GD.Print(shortlist.IsEmpty());
+
+			if (shortlist.IsEmpty()) return UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)];
 			
 			return shortlist.GetRandomMostConstrained();
 		}
@@ -104,68 +101,88 @@ namespace HexModule
 		* Remove the hex from the shortlist and uncollapsed list
 		* Tell the hex to collapse
 		* Constrain the neighbors
-		* This is so messy it's not even funny
+		* Constrain the neighbors' neighbors
 		*/
 		public void CollapseHex(WfcHex hex, HexType hexType)
 		{
-			if (hex.Collapsed) return;
+			if (hex is null || hex.Collapsed) return;
 			
+			CollapseHexAndUpdateLists(hex, hexType);
+
+			Hex[] neighbors = GetHexNeighbors(hex);
+
+			// Constrain the neighbor on each edge, and their neighbors
+			for (int edgeIndex = 0; edgeIndex < Hex.NumEdges; edgeIndex++)
+			{
+				WfcHex neighbor = GetNeighbor(neighbors, edgeIndex);
+
+				if (neighbor is null) continue;
+
+				HashSet<EdgeType> validEdgeTypes = hex.GetValidEdgeTypes(edgeIndex);
+				
+				ConstrainNeighborAndBeyond(neighbor, validEdgeTypes, edgeIndex);
+			}
+		}
+
+
+
+		private void CollapseHexAndUpdateLists(WfcHex hex, HexType hexType)
+		{
 			CollapsedHexes.Add(hex);
 			UncollapsedHexes.Remove(hex);
 			shortlist.Remove(hex);
 
 			hex.Collapse(hexType);
+		}
 
-			// Constrain each neighbor
-			Hex[] neighbors = GetHexNeighbors(hex);
 
-			for (int i = 0; i < 6; i++)
+
+		private void ConstrainNeighborAndBeyond(WfcHex neighbor, HashSet<EdgeType> validEdgeTypes, int edgeIndex)
+		{
+			// The neighbor's edge index is opposite the collapsed hex's
+			const int EdgeOffset = 3;
+
+			// Constrain the edge adjacent to the collapsed hex's edge
+			ConstrainAndInsertToShortlist(neighbor, validEdgeTypes, edgeIndex + EdgeOffset);
+
+			Hex[] neighborNeighbors = GetHexNeighbors(neighbor);
+
+			// Constrain the neighbor's neighbors, excluding the original collapsed hex
+			// This loops through edge indices 4, 5, 0, 1, 2 (mod 6)
+			for (int neighborEdgeIndex = 4; neighborEdgeIndex <= 8; neighborEdgeIndex++)
 			{
-				if (neighbors[i] is null || neighbors[i] is not WfcHex neighbor || neighbor.Collapsed) continue;
+				WfcHex neighborNeighbor = GetNeighbor(neighborNeighbors, neighborEdgeIndex);
 
-				// Keep track of this for update_or_insert()
-				int previous_num = neighbor.Constraint;
+				if (neighborNeighbor is null) continue;
 
-				// Constrain the adjacent edge on the neighbor, which is offset by 3
-				neighbor.ConstrainEdge(i + 3, hex.GetValidEdgeTypes(i));
-
-				shortlist.UpdateOrInsert(neighbor, previous_num);
-
-				// Hex past neighbor
-				Hex[] neighbor_neighbors = GetHexNeighbors(neighbor);
-
-				if (neighbor_neighbors[i] is null or not WfcHex) continue;
-
-				WfcHex second_neighbor = neighbor_neighbors[i] as WfcHex;
-
-				if (second_neighbor.Collapsed) continue;
-
-				previous_num = second_neighbor.Constraint;
-
-				second_neighbor.ConstrainEdge(i + 3, neighbor.GetValidEdgeTypes(i));
-
-				shortlist.UpdateOrInsert(second_neighbor, previous_num);
+				HashSet<EdgeType> neighborValidEdgeTypes = neighbor.GetValidEdgeTypes(neighborEdgeIndex);
 				
-				for (int j = 4; j <= 8; j++)
-					constrain_neighbor(j % 6);
-
-				void constrain_neighbor(int edgeIndex)
-				{
-
-					if (neighbor_neighbors[edgeIndex] is null or not WfcHex) return;
-
-					WfcHex neighbor_to_constrain = neighbor_neighbors[edgeIndex] as WfcHex;
-
-					if (neighbor_to_constrain.Collapsed) return;
-					
-
-					int previous_num = neighbor_to_constrain.Constraint;
-
-					neighbor_to_constrain.ConstrainEdge(edgeIndex + 3, neighbor.GetValidEdgeTypes(edgeIndex));
-
-					shortlist.UpdateOrInsert(neighbor_to_constrain, previous_num);
-				}
+				ConstrainAndInsertToShortlist(neighborNeighbor, neighborValidEdgeTypes, neighborEdgeIndex + EdgeOffset);
 			}
+		}
+
+
+
+		// Get the neighbor adjacent to the edge, return null if it isn't nice
+		private static WfcHex GetNeighbor(Hex[] neighbors, int edgeIndex)
+		{
+			edgeIndex %= Hex.NumEdges;
+
+			if (neighbors[edgeIndex] is null || neighbors[edgeIndex] is not WfcHex neighbor || neighbor.Collapsed)
+				return null;
+
+			return neighbor;
+		}
+
+
+
+		private void ConstrainAndInsertToShortlist(WfcHex hex, HashSet<EdgeType> validEdgeTypes, int edgeIndex)
+		{
+			int previousConstraint = hex.Constraint;
+
+			hex.ConstrainEdge(edgeIndex, validEdgeTypes);
+
+			shortlist.UpdateOrInsert(hex, previousConstraint);
 		}
 
 
@@ -180,7 +197,7 @@ namespace HexModule
 
 			if (end is null) return new();
 
-			if (!start.TerrainType.IsTraversable || !end.TerrainType.IsTraversable) return new();
+			if (!start.TerrainType.Traversable || !end.TerrainType.Traversable) return new();
 
 			// Search from end to start
 			PriorityQueue<Hex, float> frontier = new();
@@ -191,8 +208,6 @@ namespace HexModule
 			Dictionary<Hex, bool> traversableBounds = new() {{ end, true }};
 
 			int searched = 0;
-
-
 
 			while (frontier.Count > 0)
 			{
@@ -209,7 +224,7 @@ namespace HexModule
 				{
 					if (next is null) continue;
 					
-					if (!next.TerrainType.IsTraversable)
+					if (!next.TerrainType.Traversable)
 					{
 						traversableBounds[current] = true;
 						continue;
@@ -300,7 +315,7 @@ namespace HexModule
 
 		public bool AllHexesCollapsed()
 		{
-			return (UncollapsedHexes.Count == 0);
+			return UncollapsedHexes.Count == 0;
 		}
 
 

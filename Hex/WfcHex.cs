@@ -9,10 +9,10 @@ namespace HexModule
 	{
 		public bool Collapsed { get; private set; }
 
-		private readonly List<EdgeType>[] validEdgeTypes = new List<EdgeType>[6];
-		public List<EdgeType> GetValidEdgeTypes(int edgeIndex) => validEdgeTypes[edgeIndex % 6];
+		private readonly HashSet<EdgeType>[] validEdgeTypes = new HashSet<EdgeType>[NumEdges];
+		public HashSet<EdgeType> GetValidEdgeTypes(int edgeIndex) => validEdgeTypes[edgeIndex % NumEdges];
 
-		public List<HexType> ValidHexTypes { get; private set; }
+		public HashSet<HexType> ValidHexTypes { get; private set; }
 
 		public int Constraint { get; private set; }
 
@@ -22,64 +22,52 @@ namespace HexModule
 		{
 			Collapsed = false;
 
-			ValidHexTypes = HexTypesCollection.hexTypes.ToList();
+			ValidHexTypes = HexTypesCollection.AllHexTypes.ToHashSet();
+
+			// If we don't do this, every hex will have the wildcard and there will be no constraints
+			ValidHexTypes.Remove(HexTypesCollection.AllHexTypes.ToArray()[0]);
 
 			// Fill all the lists
-			for (int i = 0; i < numEdges; i++)
+			for (int i = 0; i < NumEdges; i++)
 				validEdgeTypes[i] = HexTypesCollection.GetCommonEdgeTypes(ValidHexTypes);
 
 			// Update all the edges after filling the lists
-			for (int i = 0; i < numEdges; i++)
+			for (int i = 0; i < NumEdges; i++)
 				UpdateEdgeAllowedTypes(i);
-
-			Constrain();
 		}
 
 
 
 		public void ConstrainEdge(int edge, EdgeType allowedEdgeType)
 		{
-			ConstrainEdge(edge, new List<EdgeType> { allowedEdgeType });
+			ConstrainEdge(edge, new HashSet<EdgeType> { allowedEdgeType });
 		}
 
 
 
-		public void ConstrainEdge(int edge, List<EdgeType> allowedEdgeTypes)
+		public void ConstrainEdge(int edgeIndex, HashSet<EdgeType> newValidEdgeTypes)
 		{
-			edge %= numEdges;
+			edgeIndex %= NumEdges;
 
-			if (allowedEdgeTypes.Contains(EdgeType.Wildcard)) return;
+			if (newValidEdgeTypes.Contains(EdgeType.Wildcard)) return;
 
-			foreach (HexType allowedType in ValidHexTypes.ToList())
+			// Remove hex types where the edge type at edgeIndex is not in newValidEdgeTypes
+			ValidHexTypes.RemoveWhere(validHexType =>
 			{
-				EdgeType typeEdge = allowedType.Edges[edge];
+				EdgeType edgeType = validHexType.EdgeTypes[edgeIndex];
+				return !newValidEdgeTypes.Contains(edgeType);
+			});
 
-				if (!allowedEdgeTypes.Contains(typeEdge))
-					ValidHexTypes.Remove(allowedType);
-			}
-
-			UpdateEdgeAllowedTypes(edge);
-
-			Constrain();
+			UpdateEdgeAllowedTypes(edgeIndex);
 		}
 
 
 
-		private void UpdateEdgeAllowedTypes(int edge)
+		private void UpdateEdgeAllowedTypes(int edgeIndex)
 		{
-			edge %= numEdges;
-
-			List<EdgeType> edgeAllowedTypes = new();
-
-			foreach (HexType validHexType in ValidHexTypes)
-			{
-				EdgeType[] typeEdges = validHexType.Edges;
-
-				if (!edgeAllowedTypes.Contains(typeEdges[edge]))
-					edgeAllowedTypes.Add(typeEdges[edge]);
-			}
-
-			validEdgeTypes[edge] = edgeAllowedTypes;
+			validEdgeTypes[edgeIndex] = ValidHexTypes
+				.Select(validHexType => validHexType.EdgeTypes[edgeIndex])
+				.ToHashSet();
 
 			Constrain();
 		}
@@ -95,7 +83,7 @@ namespace HexModule
 				allowedTypeWeight += allowedType.Weight;
 
 			int numAllowedEdges = 0;
-			foreach (List<EdgeType> validEdgeType in validEdgeTypes)
+			foreach (HashSet<EdgeType> validEdgeType in validEdgeTypes)
 				numAllowedEdges += validEdgeType.Count;
 
 			Constraint = Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
@@ -109,10 +97,12 @@ namespace HexModule
 
 			if (ValidHexTypes.Count == 0) return new();
 
-			int cumWeight = 0;
-			List<int> cumWeights = new(ValidHexTypes.Count);
+			List<HexType> validHexTypesList = ValidHexTypes.ToList();
 
-			foreach (HexType allowedType in ValidHexTypes)
+			int cumWeight = 0;
+			List<int> cumWeights = new(validHexTypesList.Count);
+
+			foreach (HexType allowedType in validHexTypesList)
 			{
 				cumWeight += allowedType.Weight;
 				cumWeights.Add(cumWeight);
@@ -125,11 +115,10 @@ namespace HexModule
 			{
 				index++;
 
-				if (weight > choice)
-					break;
+				if (weight > choice) break;
 			}
 
-			return ValidHexTypes[index];
+			return validHexTypesList[index];
 		}
 
 
@@ -138,6 +127,14 @@ namespace HexModule
 		{
 			Collapsed = true;
 			TerrainType = type;
+
+			// We need to update these lists in order for the neighboring hexes to be constrained
+			ValidHexTypes = new() { type };
+
+			for (int edgeIndex = 0; edgeIndex < NumEdges; edgeIndex++)
+			{
+				validEdgeTypes[edgeIndex] = new() { type.EdgeTypes[edgeIndex] };
+			}
 		}
 
 

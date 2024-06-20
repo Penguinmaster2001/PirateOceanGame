@@ -1,4 +1,5 @@
 using Godot;
+using HexModule;
 using System.Collections.Generic;
 
 // The navigation stuff needs to go into its own class
@@ -29,7 +30,6 @@ public partial class Boat : Node3D
 
 	private ResourceManager resources = new();
 
-
 	private RandomNumberGenerator rng = new();
 
 
@@ -42,7 +42,7 @@ public partial class Boat : Node3D
 		selection_circle.Visible = false;
 		target_pos = Position;
 
-		cur_hex = hex_map.get_hex_at_world_coords(target_pos.X, target_pos.Z);
+		cur_hex = hex_map.HexAtWorldCoordinates(target_pos.X, target_pos.Z);
 		next_hex = cur_hex;
 		final_hex = cur_hex;
 
@@ -88,7 +88,7 @@ public partial class Boat : Node3D
 			cur_hex = next_hex;
 
 			next_hex = travel_queue.Dequeue();
-			target_pos = next_hex.get_world_coords()
+			target_pos = next_hex.WorldCoordinates()
 				+ new Vector3(rng.RandfRange(-20.0f, 20.0f), 0.0f, rng.RandfRange(-20.0f, 20.0f));
 			
 			boat_model.Call("update_look_at_target", target_pos);
@@ -99,10 +99,9 @@ public partial class Boat : Node3D
 
 	public void add_waypoint(Hex waypoint)
 	{
-		if (!selected)
-			return;
+		if (!selected) return;
 
-		foreach (Hex hex in hex_map.find_path(final_hex, waypoint))
+		foreach (Hex hex in hex_map.FindPathBetween(final_hex, waypoint))
 			travel_queue.Enqueue(hex);
 
 		final_hex = waypoint;

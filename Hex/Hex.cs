@@ -9,7 +9,7 @@ namespace HexModule
 	*/
 	public partial class Hex : GodotObject // To allow signals to carry Hexes
 	{
-		public const int numEdges = 6;
+		public const int NumEdges = 6;
 
 
 		public int Q { get; private set; }
@@ -29,10 +29,12 @@ namespace HexModule
 			Q = q;
 			R = r;
 			S = -q - r;
+
+			TerrainType = HexType.Wildcard;
 		}
 
 
-		public Vector3 GetWorldCoordinates()
+		public Vector3 WorldCoordinates()
 		{
 			float x = Size * ((Q * Mathf.Sqrt(3.0f)) + (R * Mathf.Sqrt(3.0f) / 2.0f));
 			float z = Size * 1.5f * R;
@@ -62,7 +64,7 @@ namespace HexModule
 
 
 		public static float GetWorldDistance(Hex a, Hex b)
-			=> a.GetWorldCoordinates().DistanceTo(b.GetWorldCoordinates());
+			=> a.WorldCoordinates().DistanceTo(b.WorldCoordinates());
 
 
 
@@ -105,7 +107,7 @@ namespace HexModule
 
 		public override string ToString()
 		{
-			return "Hex(" + Q + ", " + R + ")" + "\n" + TerrainType.Name;
+			return "Hex(" + Q + ", " + R + ")" + "\tType: " + TerrainType.Name;
 		}
 	}
 }

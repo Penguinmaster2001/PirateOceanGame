@@ -21,7 +21,7 @@ public partial class StartMenu : Control
 
     private void start_game()
     {
-        GetTree().ChangeSceneToPacked(main_game);
+        GetTree().ChangeSceneToPacked(main_game).ToString();
     }
 
 

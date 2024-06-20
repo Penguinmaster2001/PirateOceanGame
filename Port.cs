@@ -25,7 +25,7 @@ public class Port
 
         PortHex = hex;
 
-        NewBoatSpawnLocation = hex.GetWorldCoordinates();
+        NewBoatSpawnLocation = hex.WorldCoordinates();
     }
 
 
