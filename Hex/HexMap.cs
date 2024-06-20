@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace HexModule
@@ -46,11 +47,15 @@ namespace HexModule
 
 
 
-		public void PopulateHexType(int num, HexType hexType)
+		public void PopulateHexType(int num, string hexTypeName)
 		{
+			HashSet<HexType> hexTypesWithName = HexTypesCollection.GetTypesWithName(hexTypeName);
+		
 			for (int i = 0; i < num; i++)
 			{
-				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], hexType);
+				HexType randomHexType = hexTypesWithName.ElementAt((System.Index) (rng.Randi() % hexTypesWithName.Count));
+		
+				CollapseHex(UncollapsedHexes[rng.RandiRange(0, UncollapsedHexes.Count - 1)], randomHexType);
 			}
 		}
 
@@ -109,18 +114,18 @@ namespace HexModule
 			
 			CollapseHexAndUpdateLists(hex, hexType);
 
+			if (hexType.Weight == 0) return;
+
 			Hex[] neighbors = GetHexNeighbors(hex);
 
 			// Constrain the neighbor on each edge, and their neighbors
 			for (int edgeIndex = 0; edgeIndex < Hex.NumEdges; edgeIndex++)
 			{
-				WfcHex neighbor = GetNeighbor(neighbors, edgeIndex);
-
-				if (neighbor is null) continue;
+				if (!TryGetNeighbor(neighbors, edgeIndex, out WfcHex neighbor)) continue;
 
 				HashSet<EdgeType> validEdgeTypes = hex.GetValidEdgeTypes(edgeIndex);
 				
-				ConstrainNeighborAndBeyond(neighbor, validEdgeTypes, edgeIndex);
+				ConstrainNeighborAndBeyond(neighbor, validEdgeTypes, edgeIndex, 3);
 			}
 		}
 
@@ -137,7 +142,7 @@ namespace HexModule
 
 
 
-		private void ConstrainNeighborAndBeyond(WfcHex neighbor, HashSet<EdgeType> validEdgeTypes, int edgeIndex)
+		private void ConstrainNeighborAndBeyond(WfcHex neighbor, HashSet<EdgeType> validEdgeTypes, int edgeIndex, int depth)
 		{
 			// The neighbor's edge index is opposite the collapsed hex's
 			const int EdgeOffset = 3;
@@ -145,33 +150,37 @@ namespace HexModule
 			// Constrain the edge adjacent to the collapsed hex's edge
 			ConstrainAndInsertToShortlist(neighbor, validEdgeTypes, edgeIndex + EdgeOffset);
 
+			if (depth <= 0) return;
+
 			Hex[] neighborNeighbors = GetHexNeighbors(neighbor);
 
 			// Constrain the neighbor's neighbors, excluding the original collapsed hex
 			// This loops through edge indices 4, 5, 0, 1, 2 (mod 6)
 			for (int neighborEdgeIndex = 4; neighborEdgeIndex <= 8; neighborEdgeIndex++)
 			{
-				WfcHex neighborNeighbor = GetNeighbor(neighborNeighbors, neighborEdgeIndex);
-
-				if (neighborNeighbor is null) continue;
+				if (!TryGetNeighbor(neighborNeighbors, neighborEdgeIndex, out WfcHex neighborNeighbor)) continue;
 
 				HashSet<EdgeType> neighborValidEdgeTypes = neighbor.GetValidEdgeTypes(neighborEdgeIndex);
 				
-				ConstrainAndInsertToShortlist(neighborNeighbor, neighborValidEdgeTypes, neighborEdgeIndex + EdgeOffset);
+				ConstrainNeighborAndBeyond(neighborNeighbor, neighborValidEdgeTypes, neighborEdgeIndex, depth - 1);
 			}
 		}
 
 
 
 		// Get the neighbor adjacent to the edge, return null if it isn't nice
-		private static WfcHex GetNeighbor(Hex[] neighbors, int edgeIndex)
+		private static bool TryGetNeighbor(Hex[] neighbors, int edgeIndex, out WfcHex neighbor)
 		{
 			edgeIndex %= Hex.NumEdges;
 
-			if (neighbors[edgeIndex] is null || neighbors[edgeIndex] is not WfcHex neighbor || neighbor.Collapsed)
-				return null;
+			neighbor = null;
 
-			return neighbor;
+			if (neighbors[edgeIndex] is null || neighbors[edgeIndex] is not WfcHex validNeighbor || validNeighbor.Collapsed)
+				return false;
+
+			neighbor = validNeighbor;
+
+			return true;
 		}
 
 

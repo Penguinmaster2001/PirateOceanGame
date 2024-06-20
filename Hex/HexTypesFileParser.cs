@@ -75,7 +75,7 @@ namespace HexModule
 				HexType newHexType = new(name: property.Name);
 				
 				if (hexTypeData.TryGetProperty("weight", out JsonElement weightElement))
-					newHexType.Weight = weightElement.GetInt32();
+					newHexType.Weight = weightElement.GetInt32() * 1000;
 
 				if (hexTypeData.TryGetProperty("traversable", out JsonElement traversableElement))
 					newHexType.Traversable = traversableElement.GetBoolean();
@@ -84,11 +84,15 @@ namespace HexModule
 					newHexType.MaterialPath = materialElement.GetString();
 
 				if (hexTypeData.TryGetProperty("edges", out JsonElement edgesElement))
+				{
 					newHexType.EdgeTypes = HexTypesCollection.IntArrayToEdgeTypeArray(
 						edgesElement
 							.EnumerateArray()
 							.Select(je => JsonSerializer.Deserialize<int>(je.GetRawText()))
 							.ToArray());
+
+					newHexType.RehashEdgeTypes();
+				}
 				
 
 				loadedHexTypes.Add(newHexType);

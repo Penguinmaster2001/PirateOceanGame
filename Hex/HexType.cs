@@ -1,7 +1,8 @@
 
+using Godot;
+
 using System;
 using System.Linq;
-using Godot;
 
 namespace HexModule
 {
@@ -12,6 +13,7 @@ namespace HexModule
 		public int Weight { get; internal set; }
 		public bool Traversable { get; internal set; }
 		public string MaterialPath { get; internal set; }
+		public Material HexMaterial { get; private set; }
         public EdgeType[] EdgeTypes { get; internal set; }
 		private int edgeTypesHashCode = 0;
 
@@ -33,15 +35,16 @@ namespace HexModule
 			Weight = weight;
 			Traversable = traversable;
 			MaterialPath = materialPath ?? "res://TileTextures/undefined.tres";
-			RehashEdgeTypes(edgeTypes ?? new EdgeType[6] { new(), new(), new(), new(), new(), new() });
+			HexMaterial = GD.Load<Material>(MaterialPath);
+			EdgeTypes = edgeTypes ?? new EdgeType[6] { new(), new(), new(), new(), new(), new() };
+			RehashEdgeTypes();
 		}
 
 
 
-		private void RehashEdgeTypes(EdgeType[] newEdgeTypes)
+		internal void RehashEdgeTypes()
 		{
-			edgeTypesHashCode = newEdgeTypes.Aggregate(0, (acc, edge) => HashCode.Combine(acc, edge.GetHashCode()));
-			EdgeTypes = newEdgeTypes;
+			edgeTypesHashCode = EdgeTypes.Aggregate(0, (acc, edge) => HashCode.Combine(acc, edge.GetHashCode()));
 		}
 
 

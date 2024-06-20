@@ -33,7 +33,7 @@ namespace HexModule
 
 			// Update all the edges after filling the lists
 			for (int i = 0; i < NumEdges; i++)
-				UpdateEdgeAllowedTypes(i);
+				UpdateValidEdgeTypes(i);
 		}
 
 
@@ -58,12 +58,12 @@ namespace HexModule
 				return !newValidEdgeTypes.Contains(edgeType);
 			});
 
-			UpdateEdgeAllowedTypes(edgeIndex);
+			UpdateValidEdgeTypes(edgeIndex);
 		}
 
 
 
-		private void UpdateEdgeAllowedTypes(int edgeIndex)
+		private void UpdateValidEdgeTypes(int edgeIndex)
 		{
 			validEdgeTypes[edgeIndex] = ValidHexTypes
 				.Select(validHexType => validHexType.EdgeTypes[edgeIndex])
@@ -95,7 +95,7 @@ namespace HexModule
 		{
 			RandomNumberGenerator rng = new();
 
-			if (ValidHexTypes.Count == 0) return new();
+			if (ValidHexTypes.Count == 0) return HexType.Wildcard;
 
 			List<HexType> validHexTypesList = ValidHexTypes.ToList();
 

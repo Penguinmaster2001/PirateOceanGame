@@ -32,8 +32,8 @@ public partial class HexGrid : Node3D
 	{
 		hexMap = new(HexContainer.MapShape.triangle, GridSize);
 
-		// HexMap.seed_type(20, "super_deep_water");
-		// HexMap.seed_type(4, "mountain");
+		// hexMap.PopulateHexType(20, "super_deep_water");
+		// hexMap.PopulateHexType(4, "mountain");
 
 		ShowMap(hexMap.CollapsedHexes);
 
@@ -79,7 +79,7 @@ public partial class HexGrid : Node3D
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = GD.Load<Material>(hex.TerrainType.MaterialPath);
+		hex_mesh.MaterialOverride = hex.TerrainType.HexMaterial;
 	}
 
 

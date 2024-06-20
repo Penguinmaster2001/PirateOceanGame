@@ -1,12 +1,13 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace HexModule
 {
 	public class HexShortList
 	{
-		private readonly Dictionary<int, List<WfcHex>> hexShortlist;
+		private readonly Dictionary<int, HashSet<WfcHex>> hexShortlist;
 
 		public int Count { get; private set; }
 
@@ -74,7 +75,8 @@ namespace HexModule
 		{
 			RandomNumberGenerator rng = new();
 
-			return hexShortlist[minimumHexConstraint][rng.RandiRange(0, hexShortlist[minimumHexConstraint].Count - 1)];
+			return hexShortlist[minimumHexConstraint]
+				.ElementAt(rng.RandiRange(0, hexShortlist[minimumHexConstraint].Count - 1));
 		}
 
 
