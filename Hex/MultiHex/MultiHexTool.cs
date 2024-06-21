@@ -11,7 +11,7 @@ public partial class MultiHexTool : Control
 	private float hexSideRatio = Mathf.Cos(Mathf.Pi / 6.0f);
 	private PackedScene hex_tile = GD.Load<PackedScene>("res://Hex/HexTile.tscn");
     
-	private int grid_size = 5;
+	private int grid_size = 3;
 	
 
 	private readonly Dictionary<Hex, Node3D> visibleHexTiles = new();

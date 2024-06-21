@@ -47,14 +47,32 @@ public partial class HexGrid : Node3D
 	}
 
 
-
+	double avePerFrame = 0;
+	int total = 0;
+	int frames = 0;
 	public override void _Process(double delta)
 	{
 		if (hexMap.AllHexesCollapsed()) return;
 
+		int numThisFrame = 0;
+		frames++;
+
 		ulong start_ms = Time.GetTicksMsec();
-		while (Time.GetTicksMsec() - start_ms < 10)
-			ShowHex(hexMap.CollapseNextHex());
+		do
+		{
+			if (!hexMap.TryCollapseNextHex(out WfcHex nextCollapsedHex)) break;
+			
+			ShowHex(nextCollapsedHex);
+			numThisFrame++;
+			total++;
+		}
+		while (Time.GetTicksMsec() - start_ms < 10);
+
+		avePerFrame = (double) total / (double) frames;
+
+		GD.Print("Total: " + total);
+		GD.Print("This frame: " + numThisFrame);
+		GD.Print("Average: " + avePerFrame);
 	}
 
 

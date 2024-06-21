@@ -7,96 +7,96 @@ namespace HexModule
 {
 	public class HexShortList
 	{
-		private readonly Dictionary<int, HashSet<WfcHex>> hexShortlist;
+		private class HexComparer : IComparer<WfcHex>
+		{
+			public int Compare(WfcHex x, WfcHex y)
+			{
+				if (x == y) return 0;
 
-		public int Count { get; private set; }
+				int result = x.Constraint - y.Constraint;
 
-		private int minimumHexConstraint;
+				if (result == 0)
+					result = x.Q - y.Q;
+
+				if (result == 0)
+					result = x.R - y.R;
+
+				return result;
+			}
+		}
+
+
+
+		private readonly SortedSet<WfcHex> hexShortlist;
+		// private readonly RandomNumberGenerator rng = new();
+
+		public int Count => hexShortlist.Count;
 
 
 
 		public HexShortList()
 		{
-			Count = 0;
-			hexShortlist = new();
-			minimumHexConstraint = int.MaxValue;
+			hexShortlist = new SortedSet<WfcHex>(new HexComparer());
 		}
 
 
-		public void UpdateOrInsert(WfcHex hex, int previousConstraint)
+
+		public void Insert(WfcHex hex)
 		{
-			// The hex is already in the correct spot
-			if (hex.Constraint == previousConstraint
-				&& hexShortlist.ContainsKey(hex.Constraint)
-				&& hexShortlist[hex.Constraint].Contains(hex))
-					return;
-
-			// Remove from previous spot
-			if (hexShortlist.ContainsKey(previousConstraint) && hexShortlist[previousConstraint].Contains(hex))
-			{
-				hexShortlist[previousConstraint].Remove(hex);
-				Count--;
-
-				if (previousConstraint == minimumHexConstraint && hexShortlist[previousConstraint].Count == 0)
-					GetLeastOption();
-			}
-
-			// Insert into new spot
-			int newConstraint = hex.Constraint;
-			if (!hexShortlist.ContainsKey(newConstraint))
-				hexShortlist.Add(newConstraint, new());
-
-			hexShortlist[newConstraint].Add(hex);
-			Count++;
-
-			if (newConstraint < minimumHexConstraint)
-				minimumHexConstraint = newConstraint;
+			hexShortlist.Add(hex);
+			// GD.Print("Add: " + hexShortlist.Add(hex) + "\tSize: " + hexShortlist.Count + " Hex: " + hex.ToString());
 		}
 
 
 
 		public void Remove(WfcHex hex)
 		{
-			var num_options = hex.Constraint;
-
-			if (hexShortlist.ContainsKey(num_options) && hexShortlist[num_options].Contains(hex))
-			{
-				hexShortlist[num_options].Remove(hex);
-				Count--;
-
-				if (num_options == minimumHexConstraint && hexShortlist[num_options].Count == 0)
-					GetLeastOption();
-			}
+			hexShortlist.Remove(hex);
+			// GD.Print("Rem: " + hexShortlist.Remove(hex) + "\tSize: " + hexShortlist.Count + " Hex: " + hex.ToString());
 		}
 
 
 
-		public WfcHex GetRandomMostConstrained()
+		public bool TryGetMostConstrainedHex(out WfcHex mostConstrainedHex)
 		{
-			RandomNumberGenerator rng = new();
+			mostConstrainedHex = null;
 
-			return hexShortlist[minimumHexConstraint]
-				.ElementAt(rng.RandiRange(0, hexShortlist[minimumHexConstraint].Count - 1));
-		}
+			if (IsEmpty()) return false;
 
+			List<WfcHex> leastConstrainedHexes = hexShortlist
+				.TakeWhile(hex => hex.Constraint == hexShortlist.Min.Constraint)
+				.ToList();
 
+			// GD.Print(hexShortlist.Count);
+			// GD.Print(leastConstrainedHexes.Count);
+			// GD.Print();
 
-		// Find the smallest key with a non-empty list
-		private void GetLeastOption()
-		{
-			minimumHexConstraint = int.MaxValue;
-			foreach(int key in hexShortlist.Keys)
+			// mostConstrainedHex = leastConstrainedHexes.ElementAt(rng.RandiRange(0, leastConstrainedHexes.Count - 1));
+			// GD.Print("Random most constrained: " + randomMostConstrainedHex.ToString());
+
+			mostConstrainedHex = hexShortlist.Min;
+
+			if (mostConstrainedHex.Collapsed)
 			{
-				if (key < minimumHexConstraint && hexShortlist[key].Count > 0)
-					minimumHexConstraint = key;
+				GD.PushError("ERROR: Most constrained is collapsed");
+
+				// GD.Print("Removing bad hex" + randomMostConstrainedHex.ToString());
+				// GD.Print(hexShortlist.Contains(randomMostConstrainedHex));
+				// this.Remove(randomMostConstrainedHex);
+
+				// randomMostConstrainedHex = null;
+				
+				// return false;
 			}
+
+			return true;
 		}
 
 
 
 		public bool IsEmpty()
 		{
-			return Count == 0;
+			return hexShortlist.Count == 0;
 		}
 	}
 }

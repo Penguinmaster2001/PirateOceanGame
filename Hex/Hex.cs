@@ -1,4 +1,7 @@
+
 using Godot;
+
+using System;
 
 
 namespace HexModule
@@ -7,7 +10,7 @@ namespace HexModule
 	* 
 	* 
 	*/
-	public partial class Hex : GodotObject // To allow signals to carry Hexes
+	public partial class Hex : GodotObject, IEquatable<Hex> // To allow signals to carry Hexes
 	{
 		public const int NumEdges = 6;
 
@@ -105,9 +108,52 @@ namespace HexModule
 
 
 
-		public override string ToString()
+        public bool Equals(Hex other)
+        {
+			if (other is null) return false;
+
+        	return this.Q == other.Q && this.R == other.R;
+        }
+
+
+
+		public override bool Equals(object obj)
+		{
+			if (obj is Hex other) return this.Equals(other);
+
+			return false;
+		}
+
+
+
+        public static bool operator ==(Hex left, Hex right)
+        {
+			if (left is null) return right is null;
+
+            return left.Equals(right);
+        }
+
+
+
+        public static bool operator !=(Hex left, Hex right)
+        {
+            return !(left == right);
+        }
+
+
+
+		// Most of the time the pair (Q, R) is unique for this hex
+		// And if it isn't, the two hexes are in different maps and likely won't ever interact
+		public override int GetHashCode()
+        {
+            return System.HashCode.Combine(Q, R);
+        }
+
+
+
+        public override string ToString()
 		{
 			return "Hex(" + Q + ", " + R + ")" + "\tType: " + TerrainType.Name;
 		}
-	}
+    }
 }

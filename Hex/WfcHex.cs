@@ -1,6 +1,8 @@
+
 using Godot;
-using System.Collections.Generic;
+
 using System.Linq;
+using System.Collections.Generic;
 
 
 namespace HexModule
@@ -28,12 +30,13 @@ namespace HexModule
 			ValidHexTypes.Remove(HexTypesCollection.AllHexTypes.ToArray()[0]);
 
 			// Fill all the lists
-			for (int i = 0; i < NumEdges; i++)
-				validEdgeTypes[i] = HexTypesCollection.GetCommonEdgeTypes(ValidHexTypes);
+			HashSet<EdgeType> commonEdges = HexTypesCollection.AllEdgeTypes;
+			commonEdges.Remove(EdgeType.Wildcard);
 
-			// Update all the edges after filling the lists
 			for (int i = 0; i < NumEdges; i++)
-				UpdateValidEdgeTypes(i);
+				validEdgeTypes[i] = commonEdges;
+
+			Constrain();
 		}
 
 
@@ -45,29 +48,38 @@ namespace HexModule
 
 
 
+		// Remove valid hex types that don't have their edge in the new valid edge types list
 		public void ConstrainEdge(int edgeIndex, HashSet<EdgeType> newValidEdgeTypes)
 		{
 			edgeIndex %= NumEdges;
 
 			if (newValidEdgeTypes.Contains(EdgeType.Wildcard)) return;
 
-			// Remove hex types where the edge type at edgeIndex is not in newValidEdgeTypes
-			ValidHexTypes.RemoveWhere(validHexType =>
+			HashSet<EdgeType> currentValidEdgeTypes = new HashSet<EdgeType>();
+			List<HexType> toRemove = new List<HexType>();
+
+			// Collect hex types to remove and update currentValidEdgeTypes in one pass
+			foreach (HexType validHexType in ValidHexTypes)
 			{
 				EdgeType edgeType = validHexType.EdgeTypes[edgeIndex];
-				return !newValidEdgeTypes.Contains(edgeType);
-			});
+				if (!newValidEdgeTypes.Contains(edgeType))
+				{
+					toRemove.Add(validHexType);
+				}
+				else
+				{
+					currentValidEdgeTypes.Add(edgeType);
+				}
+			}
 
-			UpdateValidEdgeTypes(edgeIndex);
-		}
+			// Remove invalid hex types in bulk
+			foreach (HexType hexType in toRemove)
+			{
+				ValidHexTypes.Remove(hexType);
+			}
 
-
-
-		private void UpdateValidEdgeTypes(int edgeIndex)
-		{
-			validEdgeTypes[edgeIndex] = ValidHexTypes
-				.Select(validHexType => validHexType.EdgeTypes[edgeIndex])
-				.ToHashSet();
+			// Directly update validEdgeTypes for the edgeIndex
+			validEdgeTypes[edgeIndex] = currentValidEdgeTypes;
 
 			Constrain();
 		}
@@ -76,17 +88,15 @@ namespace HexModule
 
 		private void Constrain()
 		{
-			Constraint = 0;
+			// Constraint = 0;
 
-			int allowedTypeWeight = 0;
-			foreach (HexType allowedType in ValidHexTypes)
-				allowedTypeWeight += allowedType.Weight;
+			// int allowedTypeWeight = 0;
+			// foreach (HexType allowedType in ValidHexTypes)
+			// 	allowedTypeWeight += allowedType.Weight;
 
-			int numAllowedEdges = 0;
-			foreach (HashSet<EdgeType> validEdgeType in validEdgeTypes)
-				numAllowedEdges += validEdgeType.Count;
+			// int numAllowedEdges = validEdgeTypes.Sum(validEdgeType => validEdgeType.Count);
 
-			Constraint = Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
+			Constraint = validEdgeTypes.Sum(validEdgeType => validEdgeType.Count); // Mathf.Min(36 * allowedTypeWeight / 3, numAllowedEdges * 1000);
 		}
 
 
@@ -141,7 +151,7 @@ namespace HexModule
 
 		public override string ToString()
 		{
-			return "Wfc" + base.ToString();
+			return "Wfc" + base.ToString() + "\t" + (Collapsed ? "Collapsed" : ("Constraint: " + Constraint));
 		}
 	}
 }

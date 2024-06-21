@@ -7,11 +7,13 @@ namespace HexModule
 	public static class HexTypesCollection
 	{
 		public static HashSet<HexType> AllHexTypes { get; private set; }
+		public static HashSet<EdgeType> AllEdgeTypes { get; private set; }
 		public static List<string> HexTypeMaterialFilePaths { get; private set; }
 
 		static HexTypesCollection()
 		{
 			AllHexTypes = HexTypesFileParser.ParseJson("res://Hex/hex_type_data.json");
+			AllEdgeTypes = GetCommonEdgeTypes(AllHexTypes);
 		}
 
 
