@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 public class CrewManager
 {
-	private List<Sailor> officers = new();
-	private List<Sailor> seamen = new();
+	private List<Seaman> officers = new();
+	private List<Seaman> seamen = new();
 
     private int crew_capacity = 20;
 
@@ -35,12 +35,12 @@ public class CrewManager
 
 		crew_string += "\nOfficers:";
 
-		foreach (Sailor officer in officers)
+		foreach (Seaman officer in officers)
 			crew_string += "\n" + officer.ToString();
 		
 		crew_string += "\nSeamen:";
 
-		foreach (Sailor seaman in seamen)
+		foreach (Seaman seaman in seamen)
 			crew_string += "\n" + seaman.ToString();
 
         return crew_string;

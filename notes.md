@@ -5,7 +5,7 @@
 
 - The wfc algorithm needs to work with and within MultiHexes. Do MultiHexes make sense? There will need to be so many different patterns. I may just want to stick with individual hex wfc, and then maybe MultiHexes can be predefined structures instead.
 
-- Everything is a WfcHex, the base class for Hex doesn't really have a use. But I want the base hex to be what's actually used everywhere. I need to figure out where to use the WfcHexes so they don't replace base hexes.
+- Everything is a WfcHex, the base class for Hex doesn't really have a use. But I want the base hex to be what's actually used everywhere. I need to figure out where to use the WfcHexes so they don't replace base hexes. Probably need a Hex.WFC namespace.
 
 # It's time to move on from map generation. I still have some other things to get working on
 
