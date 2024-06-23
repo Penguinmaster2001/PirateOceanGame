@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 
-namespace HexModule
+namespace HexModule.Map
 {
 	public class HexContainer
 	{
@@ -80,7 +80,7 @@ namespace HexModule
 
 
 		// Return a list of the six neighbors to the hex, null if a neighbor doesn't exist
-		protected WfcHex[] GetHexNeighbors(Hex hex)
+		internal WfcHex[] GetHexNeighbors(Hex hex)
 		{
 			Vector2I[] neighbor_dirs = new Vector2I[] {
 				new( 1,  0), // Right

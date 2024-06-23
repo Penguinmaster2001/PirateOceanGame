@@ -2,6 +2,7 @@
 using Godot;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HexModule
@@ -11,11 +12,11 @@ namespace HexModule
 	{
 		public string Name { get; internal set; }
 		public int Weight { get; internal set; }
-		public bool Traversable { get; internal set; }
 		public string MaterialPath { get; internal set; }
 		public Material HexMaterial { get; private set; }
         public EdgeType[] EdgeTypes { get; internal set; }
 		private int edgeTypesHashCode = 0;
+		public HashSet<NavigableTag> NavigableTags { get; internal set; }
 
 
         public static HexType Wildcard { get; }
@@ -28,15 +29,15 @@ namespace HexModule
 
 
 
-		public HexType(string name = null, int weight = 0, bool traversable = false,
-			string materialPath = null, EdgeType[] edgeTypes = null)
+		public HexType(string name = null, int? weight = 0,
+			string materialPath = null, EdgeType[] edgeTypes = null, HashSet<NavigableTag> navigableTags = null)
 		{
 			Name = name ?? "Undefined";
-			Weight = weight;
-			Traversable = traversable;
+			Weight = weight ?? 0;
 			MaterialPath = materialPath ?? "res://TileTextures/undefined.tres";
 			HexMaterial = GD.Load<Material>(MaterialPath);
 			EdgeTypes = edgeTypes ?? new EdgeType[6] { new(), new(), new(), new(), new(), new() };
+			NavigableTags = navigableTags ?? new();
 			RehashEdgeTypes();
 		}
 
@@ -55,9 +56,9 @@ namespace HexModule
 			{
 				Name = this.Name,
 				Weight = this.Weight,
-				Traversable = this.Traversable,
 				MaterialPath = this.MaterialPath,
-				EdgeTypes = (EdgeType[]) this.EdgeTypes.Clone()
+				EdgeTypes = this.EdgeTypes.ToArray(),
+				NavigableTags = this.NavigableTags.ToHashSet()
 			};
 		}
 
@@ -67,20 +68,7 @@ namespace HexModule
         {
 			if (other == null) return false;
 
-			if (!(this.Traversable == other.Traversable
-				&& this.Weight == other.Weight
-				&& this.Name == other.Name
-				&& this.MaterialPath == other.MaterialPath))
-					return false;
-
-			for (int i = 0; i < Hex.NumEdges; i++)
-			{
-				if (this.EdgeTypes[i] != other.EdgeTypes[i]) return false;
-			}
-
-			return true;
-
-			// this.EdgeTypes.SequenceEqual(other.EdgeTypes);
+			return this.GetHashCode() == other.GetHashCode();
         }
 
 
@@ -112,12 +100,7 @@ namespace HexModule
 
 		public override int GetHashCode()
 		{
-			return HashCode.Combine(
-				Name,
-				Weight,
-				Traversable,
-				MaterialPath,
-				edgeTypesHashCode);
+			return HashCode.Combine(Name, edgeTypesHashCode);
 		}
 
 
@@ -130,12 +113,9 @@ namespace HexModule
 
 
 
-	/*
-	 * This is really just meant to act as a type alias for int
-	 * I may add more in the future, however
-	 */
+
 	[Serializable]
-	public struct EdgeType
+	public struct EdgeType : IEquatable<EdgeType>
 	{
 		public int Type { get; set; }
 
@@ -153,15 +133,22 @@ namespace HexModule
         public EdgeType(int type = 0)
         {
 			Type = type;
-        }
+		}
 
 
 
-        public override readonly bool Equals(object obj)
+		public readonly bool Equals(EdgeType other)
+		{
+			return this.Type == other.Type;
+		}
+
+
+
+		public override readonly bool Equals(object obj)
         {
 			if (obj is null or not EdgeType) return false;
 
-			return this.Type == ((EdgeType) obj).Type;
+			return this.Equals((EdgeType) obj);
         }
 
 
@@ -192,4 +179,16 @@ namespace HexModule
             return Type.ToString();
         }
     }
+
+
+	[Serializable]
+	public struct NavigableTag
+	{
+		public int Tag;
+
+		public NavigableTag(int tag)
+		{
+			Tag = tag;
+		}
+	}
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 
-namespace HexModule
+namespace HexModule.Map
 {
 	public class HexMap : HexContainer
 	{
@@ -224,132 +224,6 @@ namespace HexModule
 			hex.ConstrainEdge(edgeIndex, validEdgeTypes);
 
 			shortlist.Insert(hex);
-		}
-
-
-		/*
-		* Return the path between two hexes
-		* Tries to make as many straight lines as possible
-		* Uses a modified version of the A* alg
-		*/
-		public List<Hex> FindPathBetween(Hex start, Hex end)
-		{
-			start ??= GetHex(0, 0);
-
-			if (end is null) return new();
-
-			if (!start.TerrainType.Traversable || !end.TerrainType.Traversable) return new();
-
-			// Search from end to start
-			PriorityQueue<Hex, float> frontier = new();
-			frontier.Enqueue(end, 0);
-			List<Hex> reached = new() { end };
-			Dictionary<Hex, Hex> previousHex = new() {{ end, null }};
-			Dictionary<Hex, float> hexCostMap = new() {{ end, 0 }};
-			Dictionary<Hex, bool> traversableBounds = new() {{ end, true }};
-
-			int searched = 0;
-
-			while (frontier.Count > 0)
-			{
-				searched++;
-				if (searched > 10000)
-					return new();
-
-				Hex current = frontier.Dequeue();
-
-				if (current == start)
-					break;
-				
-				foreach (Hex next in GetHexNeighbors(current))
-				{
-					if (next is null) continue;
-					
-					if (!next.TerrainType.Traversable)
-					{
-						traversableBounds[current] = true;
-						continue;
-					}
-
-					float updatedCost = hexCostMap[current];
-					if (!reached.Contains(next))
-					{
-						reached.Add(next);
-						previousHex.Add(next, current);
-						traversableBounds.Add(next, false);
-						hexCostMap.Add(next, updatedCost);
-						frontier.Enqueue(next, updatedCost + Hex.GetWorldDistance(next, start));
-					}
-					else if (updatedCost < hexCostMap[next])
-					{
-						previousHex[next] = current;
-						hexCostMap[next] = updatedCost;
-						traversableBounds[next] = false;
-						frontier.Enqueue(next, updatedCost + Hex.GetWorldDistance(next, start));
-					}
-				}
-			}
-
-			// Build list from start to end
-			List<Hex> path = new();
-
-			{
-				Hex line_start = start;
-				Hex current = start;
-
-				while (current != end)
-				{
-					current = previousHex[current];
-
-					if (traversableBounds[current])
-					{
-						path.AddRange(FindLineBetween(line_start, current));
-						line_start = current;
-					}
-				}
-
-				path.Add(end);
-
-				// Hex current = start;
-
-				// while (current != end)
-				// {
-				// 	current = came_from[current];
-
-				// 	path.Add(current);
-				// }
-
-				// path.Add(end);
-			}
-
-			return path;
-		}
-
-
-
-		/*
-		* Find the hexes on the line between two hexes, and return a list of them in order
-		* Includes end, does not include start
-		*/
-		private List<Hex> FindLineBetween(Hex start, Hex end)
-		{
-			start ??= end;
-
-			if (end == null) return new();
-
-			// If start == end we get a division by zero
-			if (start == end) return new() {start};
-
-			int dist = Hex.GetHexDistance(start, end);
-			List<Hex> hexesOnLine = new();
-
-			for (int i = 0; i < dist + 1; i++)
-			{
-				Hex closestHex = Hex.Lerp(start, end, (float) i / (float) dist);
-				hexesOnLine.Add(GetHex(closestHex.Q, closestHex.R));
-			}
-
-			return hexesOnLine;
 		}
 
 

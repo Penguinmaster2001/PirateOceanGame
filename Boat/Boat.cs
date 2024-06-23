@@ -1,5 +1,6 @@
 using Godot;
 using HexModule;
+using HexModule.Map;
 using System.Collections.Generic;
 
 // The navigation stuff needs to go into its own class

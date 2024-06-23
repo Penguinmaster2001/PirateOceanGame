@@ -1,6 +1,5 @@
-[gd_scene load_steps=8 format=3 uid="uid://b0gbudfuwd6n1"]
+[gd_scene load_steps=7 format=3 uid="uid://b0gbudfuwd6n1"]
 
-[ext_resource type="Script" path="res://Boat/Boat.cs" id="1_3q6mg"]
 [ext_resource type="Texture2D" uid="uid://bhdsety6bwj1v" path="res://SelectionTexture.png" id="2_85thd"]
 [ext_resource type="Script" path="res://Boat/boat_model.gd" id="3_kjj1n"]
 [ext_resource type="ArrayMesh" uid="uid://ch1kb78ipsvgc" path="res://Boat/TestBoat.obj" id="4_eewhl"]
@@ -20,7 +19,6 @@ metallic_specular = 0.0
 clearcoat_roughness = 0.0
 
 [node name="Boat" type="Node3D"]
-script = ExtResource("1_3q6mg")
 
 [node name="SelectionCircle" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -0.4)

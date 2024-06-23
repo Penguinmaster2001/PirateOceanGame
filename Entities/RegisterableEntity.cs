@@ -3,13 +3,23 @@ using Registries;
 
 namespace Entities
 {
+    /// <summary>
+    /// This is for entities that need to be unique
+    /// </summary>
     public abstract class RegisterableEntity : Entity, IRegisterable
     {
         public int ID { get; private set; }
 
-        public RegisterableEntity(string name) : base(name)
+        public RegisterableEntity()
         {
             ID = GlobalRegistry.Register(this);
+        }
+
+
+
+        public bool Equals(IRegisterable other)
+        {
+            return other != null && ID == other.ID;
         }
 
 
@@ -19,13 +29,6 @@ namespace Entities
             if (obj is not RegisterableEntity registerableEntity) return false;
 
             return Equals(registerableEntity);
-        }
-
-
-
-        public bool Equals(IRegisterable other)
-        {
-            return other != null && ID == other.ID;
         }
 
 
