@@ -29,9 +29,9 @@ public partial class PortManager : Control
     {
         game_ui = GetNode<Control>("/root/Main/GameUI");
 
-		Connect(SignalName.SpawnNewBoat,
-			new Callable(GetNode("/root/Main/FleetController"),
-			nameof(FleetController.SpawnNewBoat)));
+		// Connect(SignalName.SpawnNewBoat,
+		// 	new Callable(GetNode("/root/Main/FleetController"),
+		// 	nameof(FleetController.SpawnNewBoat)));
     }
 
 

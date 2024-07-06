@@ -2,7 +2,7 @@ using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
 
-public class Seaman
+public class DepricatedSeaman
 {
 	private string name = "";
 
@@ -62,14 +62,14 @@ public class Seaman
 
 
 	// Make sure the names are read
-	static Seaman()
+	static DepricatedSeaman()
 	{
 		read_names();
 	}
 
 
 
-	public Seaman()
+	public DepricatedSeaman()
 	{
 		name = last_names[rng.RandiRange(0, last_names.Count - 1)] + ", "
 			+ first_names[rng.RandiRange(0, first_names.Count - 1)];

@@ -9,7 +9,7 @@
 			0
 		],
 		"weight": 0,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/undefined.tres"
 	},
 	"super_deep_water": {
@@ -22,7 +22,7 @@
 			-2
 		],
 		"weight": 30,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/super_deep_water.tres"
 	},
 	"super_deep_water_transition_straight": {
@@ -35,7 +35,7 @@
 			-1
 		],
 		"weight": 30,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
 	"super_deep_water_transition_convex": {
@@ -48,7 +48,7 @@
 			-1
 		],
 		"weight": 20,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
 	"super_deep_water_transition_concave": {
@@ -61,7 +61,7 @@
 			-1
 		],
 		"weight": 40,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/super_deep_water_transition.tres"
 	},
 	"deep_water": {
@@ -74,7 +74,7 @@
 			-1
 		],
 		"weight": 40,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/deep_water.tres"
 	},
 	"deep_water_transition_straight": {
@@ -87,7 +87,7 @@
 			1
 		],
 		"weight": 30,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
 	"deep_water_transition_convex": {
@@ -100,7 +100,7 @@
 			1
 		],
 		"weight": 40,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
 	"deep_water_transition_concave": {
@@ -113,7 +113,7 @@
 			1
 		],
 		"weight": 30,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/deep_water_transition.tres"
 	},
 	"shallow_water": {
@@ -126,7 +126,7 @@
 			1
 		],
 		"weight": 100,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/shallow_water.tres"
 	},
 	"port_long": {
@@ -139,7 +139,7 @@
 			1
 		],
 		"weight": 1,
-		"traversable": true,
+		"navigableTag": 1,
 		"material": "res://TileTextures/port.tres"
 	},
 	"shore_straight": {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using HexModule;
+using HexModule.Map;
 
 public partial class MultiHexTool : Control
 {

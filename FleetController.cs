@@ -17,8 +17,8 @@ public partial class FleetController : Node3D
 
 	private PackedScene boatScene = GD.Load<PackedScene>("res://Boat/boat.tscn");
 
-	private readonly List<Boat> boats = new();
-	private readonly List<Boat> selectedBoats = new();
+	// private readonly List<Boat> boats = new();
+	// private readonly List<Boat> selectedBoats = new();
 
 	private Label lblBoatInfo;
 
@@ -26,16 +26,16 @@ public partial class FleetController : Node3D
 
 	private float movementSpeed = 1000.0f;
 
-	private HexMap hexMap;
+	// private HexMap hexMap;
 
 
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		hexMap = GetNode<HexGrid>("/root/Main/HexGrid").hexMap;
+		// hexMap = GetNode<HexGrid>("/root/Main/HexGrid").hexMap;
 
-		lblBoatInfo = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
+		// lblBoatInfo = (Label) GetNode("/root/Main/GameUI").FindChild("BoatInfo");
 
 		mainCamera = GetViewport().GetCamera3D();
 	}
@@ -49,65 +49,65 @@ public partial class FleetController : Node3D
 
 
 
-	public void SpawnNewBoat(Vector3 boatSpawnCoordinates)
-	{
-		boatSpawnCoordinates.Y = 0;
+	// public void SpawnNewBoat(Vector3 boatSpawnCoordinates)
+	// {
+	// 	boatSpawnCoordinates.Y = 0;
 
-		Boat spawnedBoat = boatScene.Instantiate<Boat>();
-		spawnedBoat.Translate(boatSpawnCoordinates);
+	// 	Boat spawnedBoat = boatScene.Instantiate<Boat>();
+	// 	spawnedBoat.Translate(boatSpawnCoordinates);
 
-		spawnedBoat.hex_map = hexMap;
+	// 	spawnedBoat.hex_map = hexMap;
 
-		Connect(SignalName.AddedNewWaypoint, new Callable(spawnedBoat, nameof(Boat.add_waypoint)));
-		Connect(SignalName.SelectedBoats, new Callable(spawnedBoat, nameof(Boat.on_selection)));
-		Connect(SignalName.SelectionCleared, new Callable(spawnedBoat, nameof(Boat.on_selection_cleared)));
+	// 	Connect(SignalName.AddedNewWaypoint, new Callable(spawnedBoat, nameof(Boat.add_waypoint)));
+	// 	Connect(SignalName.SelectedBoats, new Callable(spawnedBoat, nameof(Boat.on_selection)));
+	// 	Connect(SignalName.SelectionCleared, new Callable(spawnedBoat, nameof(Boat.on_selection_cleared)));
 
-		GetParent().AddChild(spawnedBoat);
-		boats.Add(spawnedBoat);
-	}
-
-
-
-	public void HandleHexSelection(Hex hex)
-	{
-		if (hex == null) return;
-
-		if (selectedBoats.Count > 0 && hex.TerrainType.Traversable)
-			AddNewBoatWaypoint(hex.WorldCoordinates());
-	}
+	// 	GetParent().AddChild(spawnedBoat);
+	// 	boats.Add(spawnedBoat);
+	// }
 
 
 
-	private void AddNewBoatWaypoint(Vector3 pos)
-	{
-		Hex waypoint = hexMap.HexAtWorldCoordinates(pos.X, pos.Z);
+	// public void HandleHexSelection(Hex hex)
+	// {
+	// 	if (hex == null) return;
 
-		EmitSignal(SignalName.AddedNewWaypoint, waypoint);
-	}
+	// 	if (selectedBoats.Count > 0 && hex.TerrainType.Traversable)
+	// 		AddNewBoatWaypoint(hex.WorldCoordinates());
+	// }
 
 
 
-	public void UpdateSelectedBoats(SelectionPolygon selection_quad)
-	{
-		selectedBoats.Clear();
-		EmitSignal(SignalName.SelectionCleared);
+	// private void AddNewBoatWaypoint(Vector3 pos)
+	// {
+	// 	Hex waypoint = hexMap.HexAtWorldCoordinates(pos.X, pos.Z);
 
-		foreach (Boat boat in boats)
-		{
-			if (selection_quad.has_point(boat.Position))
-			{
-				selectedBoats.Add(boat);
-				boat.Call(nameof(Boat.on_selection));
-			}
-		}
+	// 	EmitSignal(SignalName.AddedNewWaypoint, waypoint);
+	// }
 
-		if (selectedBoats.Count <= 0)
-			lblBoatInfo.Text = "No boats selected";
-		else if (selectedBoats.Count == 1)
-			lblBoatInfo.Text = selectedBoats[0].ToString();
-		else
-			lblBoatInfo.Text = selectedBoats.Count + " Boats Selected";
-	}
+
+
+	// public void UpdateSelectedBoats(SelectionPolygon selection_quad)
+	// {
+	// 	selectedBoats.Clear();
+	// 	EmitSignal(SignalName.SelectionCleared);
+
+	// 	foreach (Boat boat in boats)
+	// 	{
+	// 		if (selection_quad.has_point(boat.Position))
+	// 		{
+	// 			selectedBoats.Add(boat);
+	// 			boat.Call(nameof(Boat.on_selection));
+	// 		}
+	// 	}
+
+	// 	if (selectedBoats.Count <= 0)
+	// 		lblBoatInfo.Text = "No boats selected";
+	// 	else if (selectedBoats.Count == 1)
+	// 		lblBoatInfo.Text = selectedBoats[0].ToString();
+	// 	else
+	// 		lblBoatInfo.Text = selectedBoats.Count + " Boats Selected";
+	// }
 
 
 

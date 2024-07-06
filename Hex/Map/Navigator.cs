@@ -168,7 +168,7 @@ namespace HexModule.Map
 
         private bool IsNavigable(Hex hex)
         {
-            return navigableTags.Overlaps(hex.TerrainType.NavigableTags);
+            return navigableTags.Contains(hex.TerrainType.NavigableTag);
         }
     }
 }

@@ -1,6 +1,10 @@
 
-using System;
 using Godot;
+
+using System;
+using System.Collections.Generic;
+
+using Entities.Boats.BoatParts;
 
 
 
@@ -8,6 +12,10 @@ namespace Entities.Boats;
 
 
 
+/// <summary>
+/// For controlling the visual position of a boat and managing the visual parts.
+/// It has an EventHandler TargetReached that is invoked each time it reaches the target Hex.
+/// </summary>
 public partial class VisualBoat : Node3D
 {
     public Vector3 TargetPos { get; set; } = new();
@@ -29,6 +37,23 @@ public partial class VisualBoat : Node3D
     public override void _Process(double delta)
     {
         NavigateToTarget((float) delta);
+    }
+
+
+
+    public void UpdateBoatParts(List<BoatPart> boatParts)
+    {
+        // Remove all previous boat parts in the scene
+        foreach (Node oldBoatPart in GetChildren())
+        {
+            oldBoatPart.QueueFree();
+        }
+
+        // Add new boat parts to the scene
+        foreach (BoatPart boatPart in boatParts)
+        {
+            AddChild(boatPart.EntityNode);
+        }
     }
 
 

@@ -15,6 +15,9 @@ namespace HexModule.Map
         void AddWaypoint(Hex waypoint);
 
 
+        void ClearWaypoints();
+
+
         void StartMoving();
 
 

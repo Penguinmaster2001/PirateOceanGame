@@ -1,17 +1,19 @@
 
 using Godot;
-using HexModule;
 
-namespace Entities
+
+
+namespace Entities;
+
+
+
+public interface IVisual3D
 {
-    public interface IVisual3D
-    {
-        Node3D EntityNode { get; }
+    Node3D EntityNode { get; }
 
-        void AddToScene(Node parentNode);
+    void AddToScene(Node parentNode);
 
-        void RemoveFromScene();
+    void RemoveFromScene();
 
-        void UpdateVisualPosition(Hex newPosition);
-    }
+    // void UpdateVisualPosition(Vector3 newPosition);
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Entities.Holds
 {
-    public abstract class Hold<T> where T : IHoldable<T>
+    public abstract class Hold<T> where T : IHoldable
     {
         public int Capacity { get; private set; }
 
@@ -13,9 +13,37 @@ namespace Entities.Holds
         public HashSet<T> Contents { get; private set; } = new();
 
 
+
         public Hold(int capacity)
         {
             Capacity = capacity;
+        }
+
+
+
+        /// <summary>
+        /// Set the capacity and add initial items.
+        /// </summary>
+        /// <param name="capacity">
+        /// How much stuff this can hold.
+        /// </param>
+        /// <param name="contents">
+        /// Initial items.
+        /// </param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown if the total size of the initial items is greater than capacity.
+        /// </exception>
+        public Hold(int capacity, HashSet<T> contents)
+        {
+            Capacity = capacity;
+
+            foreach (T item in contents)
+            {
+                if (!TryStore(item))
+                {
+                    throw new System.ArgumentException("Too many items in Hold");
+                }
+            }
         }
 
 
@@ -29,6 +57,8 @@ namespace Entities.Holds
             return true;
         }
         
+
+
         public bool TryStore(T holdable)
         {
             if (!CanStore(holdable)) return false;
@@ -67,10 +97,18 @@ namespace Entities.Holds
 
 
 
+        public int AvailableCapacity()
+        {
+            return Capacity - UsedCapacity;
+        }
+
+
+
         public bool IsEmpty()
         {
             return Contents.Count == 0;
         }
+
 
 
         /// <summary>
@@ -81,5 +119,9 @@ namespace Entities.Holds
         {
             return Contents.Any(holdable => holdable is S);
         }
+
+
+
+        public abstract Hold<T> Clone();
     }
 }

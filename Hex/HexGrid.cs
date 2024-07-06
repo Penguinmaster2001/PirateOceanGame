@@ -1,6 +1,13 @@
+
 using Godot;
+
 using System.Collections.Generic;
-using HexModule;
+
+using HexModule.Map;
+
+
+
+namespace HexModule;
 
 
 
@@ -37,9 +44,9 @@ public partial class HexGrid : Node3D
 
 		ShowMap(hexMap.CollapsedHexes);
 
-		Connect(SignalName.HexSelected,
-			new Callable(GetNode("/root/Main/FleetController"),
-			nameof(FleetController.HandleHexSelection)));
+		// Connect(SignalName.HexSelected,
+		// 	new Callable(GetNode("/root/Main/FleetController"),
+		// 	nameof(FleetController.HandleHexSelection)));
 
 		Connect(SignalName.HexSelected,
 			new Callable(GetNode("/root/Main/GameUI/PortManager"),
@@ -62,7 +69,7 @@ public partial class HexGrid : Node3D
 		{
 			if (!hexMap.TryCollapseNextHex(out WfcHex nextCollapsedHex)) break;
 			
-			// ShowHex(nextCollapsedHex);
+			ShowHex(nextCollapsedHex);
 			// numThisFrame++;
 			// total++;
 		}
@@ -97,7 +104,7 @@ public partial class HexGrid : Node3D
 		display_hex.Translate(hex_coords);
 		
 		MeshInstance3D hex_mesh = display_hex.GetChild<MeshInstance3D>(0);
-		hex_mesh.MaterialOverride = hex.TerrainType.HexMaterial;
+		hex_mesh.MaterialOverride = GD.Load<Material>(hex.TerrainType.MaterialPath);
 	}
 
 
